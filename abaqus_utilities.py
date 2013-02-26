@@ -1,9 +1,9 @@
 """
 A module to parse data from an ABAQUS-formatted 2D cross-section grid file.
 
-Authors: Phil Chiu
-         Perry Roth-Johnson
-Last updated: November 2, 2012
+Authors: Perry Roth-Johnson
+         Phil Chiu
+Last updated: February 21, 2013
 
 """
 
@@ -17,8 +17,8 @@ The AbaqusGrid class contains methods for parsing an ABAQUS-formatted
 2D grid file (cross-section grid).
 
 Usage:
-from abaqus_utilities import *
-g = AbaqusGrid('../run_01/input/spar_station_04_linear_abq.txt')
+import abaqus_utilities as au
+g = au.AbaqusGrid('cs_abq.txt')
 g.node_array
 g.node_array['node_no']
 g.node_array['x2']
@@ -193,9 +193,21 @@ self._elementset_block_start
                 element_headers.append(i)
             elif elementset_header_match:
                 element_set_headers.append(i)
-        self._node_block_start = node_headers[0]
-        self._element_block_start = element_headers[0]
-        self._elementset_block_start = element_set_headers[0]
+        if len(node_headers) > 0:
+            self._node_block_start = node_headers[0]
+        else:
+            self._node_block_start = 0
+            print "WARNING: node block start not found!"
+        if len(element_headers) > 0:
+            self._element_block_start = element_headers[0]
+        else:
+            self._element_block_start = 0
+            print "WARNING: element block start not found!"
+        if len(element_set_headers) > 0:
+            self._elementset_block_start = element_set_headers[0]
+        else:
+            self._elementset_block_start = 0
+            print "WARNING: elementset block start not found!"
 
 
     def _parse_nodes(self):
@@ -325,7 +337,11 @@ coordinates of that element, assign a theta1 value.
             elementset_header_match = self._elementset_header_pattern.match(line)
             if elementset_header_match:
                 # Extract the elementset name and look up its theta1 value.
-                theta1 = theta1_dict[line.strip().split('=')[-1]]
+                elementset_name = line.strip().split('=')[-1]
+                if theta1_dict.has_key(elementset_name):
+                    theta1 = theta1_dict[elementset_name]
+                else:  # (if the elementset name is not in the theta1 dictionary)
+                    theta1 = 0  # assume the theta1 value is zero
                 if debug_flag:
                     print 'element set: ' + line.strip().split('=')[-1]
                     print 'theta1 = ' + str(theta1) + '\n'
