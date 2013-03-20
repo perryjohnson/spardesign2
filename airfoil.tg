@@ -1,0 +1,381 @@
+c Sandia 100-m blade ------------------------------------------
+c blade station number:  26
+c (spar station number): 20
+c blade fraction:        0.732
+c airfoil properties ------------------------------------------
+c chord:                 4.621 m
+c twist:                 2.735 deg
+c pitch axis (fraction): 0.375
+c airfoil:               NACA 64-618
+c laminate schedule -------------------------------------------
+c spar cap:              uniax GFRP
+c   height:              0.047 m
+c   base:                1.5 m
+c shear web:             biax GFRP, foam, biax GFRP
+c   height:              0.832 m
+c   base:                0.003 m, 0.080 m, 0.003 m
+c TE reinforcement:      4 mm (uniax), 10 mm (foam)
+c LE panel:              45 mm (foam)
+c Aft panel:             45 mm (foam)
+
+c -------------------------------------------------------------
+
+c set the name of the mesh output file
+mof blade_station_26_abq.txt
+
+c set the output file type
+abaqus
+
+c set some abaqus-specific parameters
+c   assign a title to the problem
+title blade station #26
+c   build 2nd-order quadrilateral elements (with mid-side nodes)
+quadratic
+
+c -------------------------------------------------------------
+
+c set some global parameters
+para chord 4.621;      c chord length
+para pitchaxis 0.375;  c pitch axis fraction
+para hSC 0.047;        c spar cap height [m]
+para bSC 1.5;          c spar cap base [m]
+para hSW 0.832;        c shear web height [m]
+para bSW 0.086;        c shear web base [m]
+para bSWbiax 0.003;    c shear web (biax) base [m]
+para bSWfoam 0.080;    c shear web (foam) base [m]
+para bTEreinf 1.0;     c trailing edge reinforcement base [m]
+para hTEuniax 0.004;   c trailing edge reinforcement (uniax) height [m]
+para hTEfoam 0.010;    c trailing edge reinforcement (foam) height [m]
+para hLEpanel 0.045;   c leading edge panel height [m]
+para hAFTpanel 0.045;  c aft panel height [m]
+
+c -------------------------------------------------------------
+
+c trailing edge reinforcement, lower sharp segment
+ld 1 lp2
+ 2.88812500    0.00000000
+ 2.65707500    0.02545709
+;
+
+c trailing edge reinforcement, lower main segment
+ld 2 lp2
+ 2.65707500    0.02545709
+ 2.65451035    0.02554951
+ 2.42602500    0.02152462
+ 2.42072933    0.02122887
+ 2.19497500    0.00424670
+ 2.18754443    0.00355355
+ 1.96392500   -0.02147841
+ 1.95512200   -0.02255972
+ 1.88812500   -0.03165749
+;
+
+c aft panel, lower segment
+ld 3 lp2
+ 0.83600000   -0.18763685
+ 1.03377315   -0.15894854
+ 1.03972500   -0.15807517
+ 1.26288695   -0.12398605
+ 1.27077500   -0.12273838
+ 1.49279095   -0.08854298
+ 1.50182500   -0.08716592
+ 1.72352672   -0.05410267
+ 1.73287500   -0.05273947
+ 1.88812500   -0.03165749
+;
+
+c rear shear web, lower segment
+ld 4 lp2
+ 0.75000000   -0.19929366
+ 0.80538023   -0.19203952
+ 0.80867500   -0.19160052
+ 0.83600000   -0.18763685
+;
+
+c spar cap, lower segment
+ld 5 lp2
+-0.75000000   -0.25091395
+-0.57762500   -0.26220016
+-0.55731108   -0.26322602
+-0.34657500   -0.27067045
+-0.33015659   -0.27102627
+-0.11552500   -0.27240333
+-0.10325625   -0.27226932
+ 0.11552500   -0.26514836
+ 0.12352395   -0.26470012
+ 0.34657500   -0.24722350
+ 0.35039657   -0.24683996
+ 0.57762500   -0.22187269
+ 0.75000000   -0.19929366
+;
+
+c forward shear web, lower segment
+ld 6 lp2
+-0.83600000   -0.24401592
+-0.80867500   -0.24670595
+-0.78490920   -0.24862828
+-0.75000000   -0.25091395
+;
+
+c leading edge panel, segment
+ld 7 lp2
+-0.83600000   -0.24401592
+-1.01323743   -0.22656763
+-1.03972500   -0.22346232
+-1.24279022   -0.19502006
+-1.27077500   -0.19034361
+-1.35835219   -0.17423018
+-1.38630000   -0.16851863
+-1.47489381   -0.14777496
+-1.50182500   -0.14047378
+-1.59344095   -0.11088552
+-1.61735000   -0.10163427
+-1.65446587   -0.08412993
+-1.67511250   -0.07161626
+-1.68006621   -0.06807195
+-1.69357802   -0.05712942
+-1.69821750   -0.05286886
+-1.70977000   -0.04069715
+-1.73287500    0.00000000
+-1.72596198    0.07102015
+-1.71636879    0.08756333
+-1.70977000    0.09690699
+-1.69821750    0.11105649
+-1.69575913    0.11378288
+-1.67511250    0.13438792
+-1.64125905    0.16246974
+-1.61735000    0.18002030
+-1.52875619    0.23537064
+-1.50182500    0.24990830
+-1.41424781    0.29177918
+-1.38630000    0.30383075
+-1.29875978    0.33846977
+-1.27077500    0.34868680
+-1.06621257    0.41309892
+-1.03972500    0.42032154
+-0.83600000    0.46859933
+;
+
+c forward shear web, upper segment
+ld 8 lp2
+-0.83600000    0.46859933
+-0.83244080    0.46944277
+-0.80867500    0.47430406
+-0.75000000    0.48462404
+;
+
+c spar cap, upper segment
+ld 9 lp2
+-0.75000000    0.48462404
+-0.59793892    0.51136910
+-0.57762500    0.51434965
+-0.36299341    0.54058306
+-0.34657500    0.54219579
+-0.12779375    0.55797189
+-0.11552500    0.55853103
+ 0.10752605    0.56168255
+ 0.11552500    0.56154392
+ 0.34275343    0.55049973
+ 0.34657500    0.55022247
+ 0.57762500    0.52774131
+ 0.75000000    0.50420178
+;
+
+c rear shear web, upper segment
+ld 10 lp2
+ 0.75000000    0.50420178
+ 0.80867500    0.49618912
+ 0.81196977    0.49569467
+ 0.83600000    0.49161430
+;
+
+c aft panel, upper segment
+ld 11 lp2
+ 0.83600000    0.49161430
+ 1.03972500    0.45702152
+ 1.04567685    0.45592634
+ 1.27077500    0.41136142
+ 1.27866305    0.40968400
+ 1.50182500    0.36020233
+ 1.51085906    0.35809977
+ 1.73287500    0.30455163
+ 1.74222328    0.30225037
+ 1.88812500    0.26500631
+;
+
+c trailing edge reinforcement, upper main segment
+ld 12 lp2
+ 1.88812500    0.26500631
+ 1.96392500    0.24565698
+ 1.97272801    0.24337421
+ 2.19497500    0.18493704
+ 2.20240557    0.18297774
+ 2.42602500    0.12363948
+ 2.43132067    0.12222083
+ 2.65707500    0.06276242
+ 2.65963966    0.06205079
+;
+
+c trailing edge reinforcement, upper sharp segment
+ld 13 lp2
+ 2.65963966    0.06205079
+ 2.88812500    0.00000000
+;
+
+c trailing edge reinforcement, inner surface, lower segment
+ld 14 lp2
+ 2.65860824    0.03937288
+ 2.71097020    0.03360364
+ 2.88812500    0.00000000
+;
+
+c trailing edge reinforcement, inner surface, upper segment
+ld 22 lp2
+ 2.65597051    0.04854015
+ 2.71097020    0.03360364
+ 2.88812500    0.00000000
+;
+
+
+c draw guide curves for the laminate thicknesses
+c use a normal offset (lod) to make guide curves
+c this line needs to come first, otherwise, TrueGrid crashes  :(
+ld 18 lod 7 [-%hLEpanel]
+ld 15 lod 2 [-%hTEfoam-%hTEuniax]
+ld 21 lod 12 [-%hTEfoam-%hTEuniax]
+c gset 2.7 0 1
+c lv
+c interrupt
+ld 16 lod 3 [%hAFTpanel]
+ld 17 lod 5 [%hSC]
+ld 19 lod 9 [-%hSC]
+ld 20 lod 11 [-%hAFTpanel]
+
+c draw guide curves for the shear webs
+c   forward shear web
+ld 23 lpil 6 7; lpil 7 8;
+ld 24 lpil 5 6; lpil 8 9;
+c   rear shear web
+ld 25 lpil 4 5; lpil 9 10;
+ld 26 lpil 3 4; lpil 10 11;
+
+c display all 2D curves
+c gset 2.7 0 1
+lv
+c interrupt
+
+c convert 2D curves to 3D curves
+curd 1 ld2d3d 1 rt z 0 0 ;
+curd 2 ld2d3d 2 rt z 0 0 ;
+curd 3 ld2d3d 3 rt z 0 0 ;
+curd 4 ld2d3d 4 rt z 0 0 ;
+curd 5 ld2d3d 5 rt z 0 0 ;
+curd 6 ld2d3d 6 rt z 0 0 ;
+curd 7 ld2d3d 7 rt z 0 0 ;
+curd 8 ld2d3d 8 rt z 0 0 ;
+curd 9 ld2d3d 9 rt z 0 0 ;
+curd 10 ld2d3d 10 rt z 0 0 ;
+curd 11 ld2d3d 11 rt z 0 0 ;
+curd 12 ld2d3d 12 rt z 0 0 ;
+curd 13 ld2d3d 13 rt z 0 0 ;
+curd 14 ld2d3d 14 rt z 0 0 ;
+curd 15 ld2d3d 15 rt z 0 0 ;
+curd 16 ld2d3d 16 rt z 0 0 ;
+curd 17 ld2d3d 17 rt z 0 0 ;
+curd 18 ld2d3d 18 rt z 0 0 ;
+curd 19 ld2d3d 19 rt z 0 0 ;
+curd 20 ld2d3d 20 rt z 0 0 ;
+curd 21 ld2d3d 21 rt z 0 0 ;
+curd 22 ld2d3d 22 rt z 0 0 ;
+curd 23 ld2d3d 23 rt z 0 0 ;
+curd 24 ld2d3d 24 rt z 0 0 ;
+curd 25 ld2d3d 25 rt z 0 0 ;
+curd 26 ld2d3d 26 rt z 0 0 ;
+
+c make a block mesh for the LE panel
+block 1 2; 1 60; -1;
+[-%bSC/2.0+0.1] [-%bSC/2.0+0.2]; [-%hSW/2.0] [%hSW/2.0]; 0;
+cure 1 1 1 1 2 1 7
+curs 2 1 1 2 2 1 18
+curs 1 2 1 2 2 1 23
+curs 1 1 1 2 1 1 23
+c interrupt
+
+c make a block mesh for the forward shear web
+block 1 2; 1 18; -1; [-%bSC/2.0+0.1] [-%bSC/2.0+0.2]; [-%hSW/2.0] [%hSW/2.0]; 0;
+cure 1 1 1 1 2 1 23
+cure 2 1 1 2 2 1 24
+cure 1 2 1 2 2 1 6
+cure 1 1 1 2 1 1 8
+c interrupt
+
+c make a block mesh for the upper spar cap
+block 1 30; 1 2; -1; [-%bSC/2.0+0.1] [%bSC/2.0-0.1]; 0.0 0.1; 0;
+cure 1 2 1 2 2 1 9
+cure 1 1 1 2 1 1 19
+curs 1 1 1 1 2 1 24
+curs 2 1 1 2 2 1 25
+c interrupt
+
+c make a block mesh for the lower spar cap
+block 1 30; 1 2; -1; [-%bsc/2.0+0.1] [%bsc/2.0-0.1]; 0.0 0.1; 0;
+cure 1 1 1 2 1 1 5
+cure 1 2 1 2 2 1 17
+curs 1 1 1 1 2 1 24
+curs 2 1 1 2 2 1 25
+c interrupt
+
+c make a block mesh for the rear shear web
+block 1 2; 1 18; -1; [%bSC/2.0-0.2] [%bSC/2.0-0.1]; [-%hSW/2.0] [%hSW/2.0]; 0;
+cure 1 1 1 1 2 1 25
+cure 2 1 1 2 2 1 26
+cure 1 1 1 2 1 1 4
+cure 1 2 1 2 2 1 10
+c interrupt
+
+c make a block mesh for the upper aft panel
+block 1 18; 1 2; -1; [%bsc/2.0+%bsw] [%chord-%pitchaxis*%chord-%btereinf]; 0.0 0.1; 0;
+cure 1 2 1 2 2 1 11
+cure 1 1 1 2 1 1 20
+curs 1 1 1 1 2 1 26
+c interrupt
+
+c make a block mesh for the lower aft panel
+block 1 18; 1 2; -1; [%bsc/2.0+%bsw] [%chord-%pitchaxis*%chord-%btereinf]; 0.0 0.1; 0;
+cure 1 1 1 2 1 1 3
+cure 1 2 1 2 2 1 16
+curs 1 1 1 1 2 1 26
+c interrupt
+
+c make a block mesh for the lower main TE reinforcement
+block 1 30; 1 2; -1; [%chord-%pitchaxis*%chord-%btereinf] [%chord-%pitchaxis*%chord]; 0.0 0.1; 0;
+cure 1 1 1 2 1 1 2
+cure 1 2 1 2 2 1 15
+c interrupt
+
+c make a block mesh for the upper main TE reinforcement
+block 1 30; 1 2; -1; [%chord-%pitchaxis*%chord-%btereinf] [%chord-%pitchaxis*%chord]; 0.0 0.1; 0;
+cure 1 2 1 2 2 1 12
+cure 1 1 1 2 1 1 21
+c interrupt
+
+c make a block mesh for the lower sharp TE reinforcement
+block 1 10; 1 2; -1; [%chord-%pitchaxis*%chord-0.1] [%chord-%pitchaxis*%chord]; 0.1 0.11; 0;
+cure 1 1 1 2 1 1 1
+cure 1 2 1 2 2 1 14
+c interrupt
+
+c make a block mesh for the upper sharp TE reinforcement
+block 1 10; 1 2; -1; [%chord-%pitchaxis*%chord-0.1] [%chord-%pitchaxis*%chord]; -0.11 -0.1; 0;
+cure 1 2 1 2 2 1 13
+cure 1 1 1 2 1 1 22
+c interrupt
+
+c display all 3D curves
+dacd
+c display the mesh
+disp
+
+c interrupt
+merge
+tvv

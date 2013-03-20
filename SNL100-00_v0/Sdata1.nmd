@@ -1,0 +1,15 @@
+set UnitSystem 1
+set BoundaryCondition 1
+set TotalStations 34
+set MeshDensity 0
+set ElementSize .4
+set BladeRotation ccw
+set ElementSystem 281
+set Shell7Check 1
+set DBcheck 0
+set PreCompcheck 0
+set AutoGen 0
+set SW(TotalNumber) 56
+set ActiveList {SOBB_v4_LE_0pt5 SOBB_v4_LE_0pt7 SOBB_v4_LE_0pt9 SOBB_v4_LE_1pt1 SOBB_v4_Root_160mm SOBB_v4_Spar_0pt5_mod2 SOBB_v4_Spar_0pt7_mod2 SOBB_v4_Spar_0pt9_mod2 SOBB_v4_Spar_1pt1_mod2 SOBB_v4_TE_0pt5 SOBB_v4_TE_0pt7 SOBB_v4_TE_0pt9 SOBB_v4_TE_1pt1}
+set SWcornerFlag dp
+
