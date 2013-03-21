@@ -1,0 +1,42 @@
+c make a part for the lower aft panel
+block
+c specify the node distribution
+c   i-list
+    1 18;
+c   j-list
+    1 2;
+c   k-list (use -1 to use 2D shell elements)
+    -1;
+c specify the coordinates
+c   x-coordinates
+    [%bsc/2.0+%bsw] [%chord-%pitchaxis*%chord-%btereinf];
+c   y-coordinates
+    0.0 0.1;
+c   z-coordinates
+    0;
+
+c attach part to guide curves
+
+c attach the bottom edge
+cure
+c   region
+    1 1 1  c  i-min j-min k-min
+    2 1 1  c  i-max j-max k-max
+c   curve_id
+    3
+
+c attach the top edge
+cure
+c   region
+    1 2 1  c  i-min j-min k-min
+    2 2 1  c  i-max j-max k-max
+c   curve_id
+    16
+
+c attach the left edge
+curs
+c   region
+    1 1 1  c  i-min j-min k-min
+    1 2 1  c  i-max j-max k-max
+c   curve_id
+    26

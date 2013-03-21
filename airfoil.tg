@@ -292,83 +292,48 @@ curd 24 ld2d3d 24 rt z 0 0 ;
 curd 25 ld2d3d 25 rt z 0 0 ;
 curd 26 ld2d3d 26 rt z 0 0 ;
 
-c make a block mesh for the LE panel
-block 1 2; 1 60; -1;
-[-%bSC/2.0+0.1] [-%bSC/2.0+0.2]; [-%hSW/2.0] [%hSW/2.0]; 0;
-cure 1 1 1 1 2 1 7
-curs 2 1 1 2 2 1 18
-curs 1 2 1 2 2 1 23
-curs 1 1 1 2 1 1 23
+c PART 1: forward shear web
+include fwd_SW.tg
 c interrupt
 
-c make a block mesh for the forward shear web
-block 1 2; 1 18; -1; [-%bSC/2.0+0.1] [-%bSC/2.0+0.2]; [-%hSW/2.0] [%hSW/2.0]; 0;
-cure 1 1 1 1 2 1 23
-cure 2 1 1 2 2 1 24
-cure 1 2 1 2 2 1 6
-cure 1 1 1 2 1 1 8
+c PART 2: rear shear web
+include rear_SW.tg
 c interrupt
 
-c make a block mesh for the upper spar cap
-block 1 30; 1 2; -1; [-%bSC/2.0+0.1] [%bSC/2.0-0.1]; 0.0 0.1; 0;
-cure 1 2 1 2 2 1 9
-cure 1 1 1 2 1 1 19
-curs 1 1 1 1 2 1 24
-curs 2 1 1 2 2 1 25
+c PART 3: lower main TE reinforcement
+include lower_main_TE_reinf.tg
 c interrupt
 
-c make a block mesh for the lower spar cap
-block 1 30; 1 2; -1; [-%bsc/2.0+0.1] [%bsc/2.0-0.1]; 0.0 0.1; 0;
-cure 1 1 1 2 1 1 5
-cure 1 2 1 2 2 1 17
-curs 1 1 1 1 2 1 24
-curs 2 1 1 2 2 1 25
+c PART 4: upper main TE reinforcement
+include upper_main_TE_reinf.tg
 c interrupt
 
-c make a block mesh for the rear shear web
-block 1 2; 1 18; -1; [%bSC/2.0-0.2] [%bSC/2.0-0.1]; [-%hSW/2.0] [%hSW/2.0]; 0;
-cure 1 1 1 1 2 1 25
-cure 2 1 1 2 2 1 26
-cure 1 1 1 2 1 1 4
-cure 1 2 1 2 2 1 10
+c PART 5: lower aft panel
+include lower_aft_panel.tg
 c interrupt
 
-c make a block mesh for the upper aft panel
-block 1 18; 1 2; -1; [%bsc/2.0+%bsw] [%chord-%pitchaxis*%chord-%btereinf]; 0.0 0.1; 0;
-cure 1 2 1 2 2 1 11
-cure 1 1 1 2 1 1 20
-curs 1 1 1 1 2 1 26
+c PART 6: upper aft panel
+include upper_aft_panel.tg
 c interrupt
 
-c make a block mesh for the lower aft panel
-block 1 18; 1 2; -1; [%bsc/2.0+%bsw] [%chord-%pitchaxis*%chord-%btereinf]; 0.0 0.1; 0;
-cure 1 1 1 2 1 1 3
-cure 1 2 1 2 2 1 16
-curs 1 1 1 1 2 1 26
+c PART 7: lower spar cap
+include lower_SC.tg
 c interrupt
 
-c make a block mesh for the lower main TE reinforcement
-block 1 30; 1 2; -1; [%chord-%pitchaxis*%chord-%btereinf] [%chord-%pitchaxis*%chord]; 0.0 0.1; 0;
-cure 1 1 1 2 1 1 2
-cure 1 2 1 2 2 1 15
+c PART 8: upper spar cap
+include upper_SC.tg
 c interrupt
 
-c make a block mesh for the upper main TE reinforcement
-block 1 30; 1 2; -1; [%chord-%pitchaxis*%chord-%btereinf] [%chord-%pitchaxis*%chord]; 0.0 0.1; 0;
-cure 1 2 1 2 2 1 12
-cure 1 1 1 2 1 1 21
+c PART 9: LE panel
+include LE_panel.tg
 c interrupt
 
-c make a block mesh for the lower sharp TE reinforcement
-block 1 10; 1 2; -1; [%chord-%pitchaxis*%chord-0.1] [%chord-%pitchaxis*%chord]; 0.1 0.11; 0;
-cure 1 1 1 2 1 1 1
-cure 1 2 1 2 2 1 14
+c PART 10: upper sharp TE reinforcement
+include upper_sharp_TE_reinf.tg
 c interrupt
 
-c make a block mesh for the upper sharp TE reinforcement
-block 1 10; 1 2; -1; [%chord-%pitchaxis*%chord-0.1] [%chord-%pitchaxis*%chord]; -0.11 -0.1; 0;
-cure 1 2 1 2 2 1 13
-cure 1 1 1 2 1 1 22
+c PART 11: lower sharp TE reinforcement
+include lower_sharp_TE_reinf.tg
 c interrupt
 
 c display all 3D curves

@@ -1,0 +1,50 @@
+c make a part for the forward shear web
+block
+c specify the node distribution
+c   i-list
+    1 2;
+c   j-list
+    1 18;
+c   k-list (use -1 to use 2D shell elements)
+    -1;
+c specify the coordinates
+c   x-coordinates
+    [-%bSC/2.0+0.1] [-%bSC/2.0+0.2];
+c   y-coordinates
+    [-%hSW/2.0] [%hSW/2.0];
+c   z-coordinates
+    0;
+
+c attach part to guide curves
+
+c attach the left edge
+cure
+c   region
+    1 1 1  c  i-min j-min k-min
+    1 2 1  c  i-max j-max k-max
+c   curve_id
+    23
+
+c attach the right edge
+cure
+c   region
+    2 1 1  c  i-min j-min k-min
+    2 2 1  c  i-max j-max k-max
+c   curve_id
+    24
+
+c attach the bottom edge
+cure
+c   region
+    1 1 1  c  i-min j-min k-min
+    2 1 1  c  i-max j-max k-max
+c   curve_id
+    6
+
+c attach the top edge
+cure
+c   region
+    1 2 1  c  i-min j-min k-min
+    2 2 1  c  i-max j-max k-max
+c   curve_id
+    8

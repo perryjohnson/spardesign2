@@ -1,0 +1,34 @@
+c make a part for the upper sharp trailing edge reinforcement
+block
+c specify the node distribution
+c   i-list
+    1 10;
+c   j-list
+    1 2;
+c   k-list (use -1 to use 2D shell elements)
+    -1;
+c specify the coordinates
+c   x-coordinates
+    [%chord-%pitchaxis*%chord-0.1] [%chord-%pitchaxis*%chord];
+c   y-coordinates
+    -0.11 -0.1;
+c   z-coordinates
+    0;
+
+c attach part to guide curves
+
+c attach the top edge
+cure
+c   region
+    1 2 1  c  i-min j-min k-min
+    2 2 1  c  i-max j-max k-max
+c   curve_id
+    13
+
+c attach the bottom edge
+cure
+c   region
+    1 1 1  c  i-min j-min k-min
+    2 1 1  c  i-max j-max k-max
+c   curve_id
+    22
