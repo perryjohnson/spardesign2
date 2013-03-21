@@ -292,6 +292,10 @@ curd 24 ld2d3d 24 rt z 0 0 ;
 curd 25 ld2d3d 25 rt z 0 0 ;
 curd 26 ld2d3d 26 rt z 0 0 ;
 
+c make master block boundaries
+c include master_bbs.tg
+c interrupt
+
 c PART 1: forward shear web
 include fwd_SW.tg
 c interrupt
@@ -337,10 +341,19 @@ include lower_sharp_TE_reinf.tg
 c interrupt
 
 c display all 3D curves
-dacd
+c dacd
+c display 3D curve labels
+c labels crv
 c display the mesh
 disp
 
-c interrupt
+c switch to "merge" mode, to display all parts at once
 merge
-tvv
+
+c display the mesh in "filled" mode
+c tvv
+
+c display all block boundaries
+dabb
+c display block boundary labels
+labels bb

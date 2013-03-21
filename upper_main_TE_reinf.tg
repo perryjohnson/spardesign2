@@ -20,15 +20,34 @@ c attach part to guide curves
 c attach the top edge
 cure
 c   region
-    1 2 1  c  i-min j-min k-min
-    2 2 1  c  i-max j-max k-max
+    0 2 1  c  i-min j-min k-min   (0 picks extreme min)
+    0 2 1  c  i-max j-max k-max   (0 picks extreme max)
 c   curve_id
     12
 
 c attach the bottom edge
 cure
 c   region
-    1 1 1  c  i-min j-min k-min
-    2 1 1  c  i-max j-max k-max
+    0 1 1  c  i-min j-min k-min
+    0 1 1  c  i-max j-max k-max
 c   curve_id
     21
+
+
+c make block boundaries ------------------------------------------------------
+
+c make block boundary (master #12) on left edge
+bb
+c   region
+    1 0 1  c  i-min j-min k-min
+    1 0 1  c  i-max j-max k-max
+c   interface
+    12;
+
+c make block boundary (master #13) on right edge
+bb
+c   region
+    2 0 1  c  i-min j-min k-min
+    2 0 1  c  i-max j-max k-max
+c   interface
+    13;
