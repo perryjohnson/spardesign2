@@ -54,11 +54,12 @@ c -------------------------------------------------------------
 c trailing edge reinforcement, lower sharp segment
 ld 1 lp2
  2.88812500    0.00000000
- 2.65707500    0.02545709
+ 2.72774508    0.01767066
 ;
 
 c trailing edge reinforcement, lower main segment
 ld 2 lp2
+ 2.72774508    0.01767066
  2.65707500    0.02545709
  2.65451035    0.02554951
  2.42602500    0.02152462
@@ -214,26 +215,19 @@ ld 12 lp2
  2.43132067    0.12222083
  2.65707500    0.06276242
  2.65963966    0.06205079
+ 2.73243097    0.04522686
 ;
 
 c trailing edge reinforcement, upper sharp segment
 ld 13 lp2
- 2.65963966    0.06205079
- 2.88812500    0.00000000
+ 2.73243097    0.04522686
+ 2.88812500    0.00924200
 ;
 
-c trailing edge reinforcement, inner surface, lower segment
+c trailing edge reinforcement, inner surface
 ld 14 lp2
- 2.65860824    0.03937288
- 2.71097020    0.03360364
- 2.88812500    0.00000000
-;
-
-c trailing edge reinforcement, inner surface, upper segment
-ld 22 lp2
- 2.65597051    0.04854015
- 2.71097020    0.03360364
- 2.88812500    0.00000000
+ 2.72927833    0.03158645
+ 2.88812500    0.00462100
 ;
 
 
@@ -286,15 +280,11 @@ curd 18 ld2d3d 18 rt z 0 0 ;
 curd 19 ld2d3d 19 rt z 0 0 ;
 curd 20 ld2d3d 20 rt z 0 0 ;
 curd 21 ld2d3d 21 rt z 0 0 ;
-curd 22 ld2d3d 22 rt z 0 0 ;
+c curd 22 ld2d3d 22 rt z 0 0 ;
 curd 23 ld2d3d 23 rt z 0 0 ;
 curd 24 ld2d3d 24 rt z 0 0 ;
 curd 25 ld2d3d 25 rt z 0 0 ;
 curd 26 ld2d3d 26 rt z 0 0 ;
-
-c make master block boundaries
-c include master_bbs.tg
-c interrupt
 
 c PART 1: forward shear web
 include fwd_SW.tg
@@ -349,11 +339,20 @@ disp
 
 c switch to "merge" mode, to display all parts at once
 merge
+c interrupt
+c delete redundant nodes at part boundaries
+stp 0.0002  c tolerance = 0.0002
 
 c display the mesh in "filled" mode
 c tvv
 
 c display all block boundaries
-dabb
+c dabb
 c display block boundary labels
-labels bb
+c labels bb
+
+c write the output file to disk
+c write
+
+c quit TrueGrid
+c exit

@@ -2,14 +2,14 @@ c make a part for the upper sharp trailing edge reinforcement
 block
 c specify the node distribution
 c   i-list
-    1 3 10;
+    1 10;
 c   j-list
     1 2;
 c   k-list (use -1 to use 2D shell elements)
     -1;
 c specify the coordinates
 c   x-coordinates
-    [%chord-%pitchaxis*%chord-0.1] [%chord-%pitchaxis*%chord-0.08] [%chord-%pitchaxis*%chord];
+    [%chord-%pitchaxis*%chord-0.1] [%chord-%pitchaxis*%chord];
 c   y-coordinates
     -0.11 -0.1;
 c   z-coordinates
@@ -31,7 +31,7 @@ c   region
     0 1 1  c  i-min j-min k-min
     0 1 1  c  i-max j-max k-max
 c   curve_id
-    22
+    14
 
 
 c make block boundaries ------------------------------------------------------
@@ -44,10 +44,10 @@ c   region
 c   interface
     13;
 
-c make block boundary (master #1) on bottom edge, towards the right
+c make block boundary (master #1) on bottom edge
 bb
 c   region
-    2 1 1  c  i-min j-min k-min
-    3 1 1  c  i-max j-max k-max
+    0 1 1  c  i-min j-min k-min
+    0 1 1  c  i-max j-max k-max
 c   interface
     1;

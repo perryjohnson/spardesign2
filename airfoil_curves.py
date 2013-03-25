@@ -146,7 +146,70 @@ class Airfoil:
         return LE_segment
 
     def extract_TE_segments(self):
-        # find the indices
+        # find the normal vectors on the upper and lower parts of the TE_segment
+        laminate_thickness = self.hTEfoam+self.hTEuniax
+        # upper sharp trailing edge segment ----------------------------------
+        x0 = self.upper['x'][-2]
+        y0 = self.upper['y'][-2]
+        x1 = self.upper['x'][-1]
+        y1 = self.upper['y'][-1]
+        tang_upper = np.array([x1-x0, y1-y0])
+        tang_upper = tang_upper/np.linalg.norm(tang_upper)
+        tang_upper_x = tang_upper[0]
+        tang_upper_y = tang_upper[1]
+        norm_upper = -np.array([-tang_upper_y, tang_upper_x])
+        normpt = np.array([x0, y0]) + norm_upper*laminate_thickness
+        x3 = normpt[0]
+        y3 = normpt[1]
+        # plt.plot([x0, x3], [y0, y3], 'go-')
+        x5 = x3 + tang_upper_x
+        y5 = y3 + tang_upper_y
+        # plt.plot([x3, x5], [y3, y5], 'go:')
+        # lower sharp trailing edge segment ----------------------------------
+        x2 = self.lower['x'][1]
+        y2 = self.lower['y'][1]
+        x7 = self.lower['x'][0]
+        y7 = self.lower['y'][0]
+        tang_lower = np.array([x7-x2, y7-y2])
+        tang_lower = tang_lower/np.linalg.norm(tang_lower)
+        tang_lower_x = tang_lower[0]
+        tang_lower_y = tang_lower[1]
+        norm_lower = np.array([-tang_lower_y, tang_lower_x])
+        normpt = np.array([x2, y2]) + norm_lower*laminate_thickness
+        x4 = normpt[0]
+        y4 = normpt[1]
+        # plt.plot([x2, normpt[0]], [y2, normpt[1]], 'go-')
+        x6 = x4 + tang_lower_x
+        y6 = y4 + tang_lower_y
+        # plt.plot([x4, x6], [y4, y6], 'go:')
+        # find the intersection of the TE laminate thicknesses ---------------
+        m64 = (y6-y4)/(x6-x4)
+        m53 = (y5-y3)/(x5-x3)
+        x_int = (m64*x4 - y4 - m53*x3 + y3)/(m64 - m53)
+        y_int = m64*(x_int - x4) + y4
+        # plt.plot([x_int], [y_int], 'yp')
+        # plot normals above and below the intersection point ----------------
+        normpt = np.array([x_int, y_int]) - norm_upper*laminate_thickness
+        x9 = normpt[0]
+        y9 = normpt[1]
+        # plt.plot([x_int, x9], [y_int, y9], 'c^:')
+        normpt = np.array([x_int, y_int]) - norm_lower*laminate_thickness
+        x10 = normpt[0]
+        y10 = normpt[1]
+        # plt.plot([x_int, x10], [y_int, y10], 'c^:')
+        # find the midpoint of the TE thickness ------------------------------
+        x8 = x1
+        y8 = abs(y1-y7)/2.0 + y7
+        # plot the inner surface of the TE reinforcement ---------------------
+        # plt.plot([x3,x_int,x8], [y3,y_int,y8], 'mp-')
+        # plt.plot([x4,x_int,x8], [y4,y_int,y8], 'mp-')
+        # --------------------------------------------------------------------
+        # append new coords from normals above and below the intersection pt
+        temp = np.append(self.lower[0], np.array((x10,y10),dtype=dtype))
+        self.lower = np.append(temp, self.lower[1:])
+        temp = np.append(np.array((x9,y9),dtype=dtype), self.upper[-1])
+        self.upper = np.append(self.upper[:-1], temp)
+        # find the indices at the left boundary of the TE reinforcement
         lower_index = np.nonzero(self.lower==np.array(self.TE_reinf_left_coords[0],dtype=dtype))[0][0]
         upper_index = np.nonzero(self.upper==np.array(self.TE_reinf_left_coords[1],dtype=dtype))[0][0]
         # save the main segments
@@ -155,7 +218,8 @@ class Airfoil:
         # save the additional segments near the sharp trailing edge
         lower_sharp_segment = self.lower[:2]
         upper_sharp_segment = self.upper[-2:]
-        return (lower_main_segment, upper_main_segment, lower_sharp_segment, upper_sharp_segment)
+        inner_surf_segment = np.array([(x_int,y_int),(x8,y8)], dtype=dtype)
+        return (lower_main_segment, upper_main_segment, lower_sharp_segment, upper_sharp_segment, inner_surf_segment)
 
     def extract_all_segments_along_airfoil_profile(self):
         (self.SC_lower_segment, self.SC_upper_segment) = self.extract_segment_along_airfoil_profile(self.SC_left_coords, self.SC_right_coords)
@@ -163,7 +227,7 @@ class Airfoil:
         (self.fwd_SW_lower_segment, self.fwd_SW_upper_segment) = self.extract_segment_along_airfoil_profile(self.fwd_SW_left_coords, self.fwd_SW_right_coords)
         (self.rear_SW_lower_segment, self.rear_SW_upper_segment) = self.extract_segment_along_airfoil_profile(self.rear_SW_left_coords, self.rear_SW_right_coords)
         self.LE_segment = self.extract_LE_segment()
-        (self.TE_lower_main_segment, self.TE_upper_main_segment, self.TE_lower_sharp_segment, self.TE_upper_sharp_segment) = self.extract_TE_segments()
+        (self.TE_lower_main_segment, self.TE_upper_main_segment, self.TE_lower_sharp_segment, self.TE_upper_sharp_segment, self.TE_inner_surf_segment) = self.extract_TE_segments()
 
 
 
@@ -200,113 +264,8 @@ plt.plot(a.TE_lower_main_segment['x'],a.TE_lower_main_segment['y'],'yp-')
 plt.plot(a.TE_upper_main_segment['x'],a.TE_upper_main_segment['y'],'bp-')
 plt.plot(a.TE_lower_sharp_segment['x'],a.TE_lower_sharp_segment['y'],'rp-')
 plt.plot(a.TE_upper_sharp_segment['x'],a.TE_upper_sharp_segment['y'],'gp-')
+plt.plot(a.TE_inner_surf_segment['x'],a.TE_inner_surf_segment['y'],'c^--')
 
-plt.show()
-
-# ----------------------------------------------------------------------------
-# find the normal vectors on the upper and lower parts of the TE_segment
-laminate_thickness = a.hTEfoam+a.hTEuniax
-
-# upper sharp trailing edge segment
-x0 = a.TE_upper_sharp_segment['x'][0]
-y0 = a.TE_upper_sharp_segment['y'][0]
-x1 = a.TE_upper_sharp_segment['x'][1]
-y1 = a.TE_upper_sharp_segment['y'][1]
-tang_upper = np.array([x1-x0, y1-y0])
-tang_upper = tang_upper/np.linalg.norm(tang_upper)
-tang_upper_x = tang_upper[0]
-tang_upper_y = tang_upper[1]
-norm_upper = -np.array([-tang_upper_y, tang_upper_x])
-normpt = np.array([x0, y0]) + norm_upper*laminate_thickness
-x3 = normpt[0]
-y3 = normpt[1]
-plt.plot([x0, x3], [y0, y3], 'go-')
-x5 = x3 + tang_upper_x
-y5 = y3 + tang_upper_y
-# plt.plot([x3, x5], [y3, y5], 'go:')
-
-# lower part of TE_segment
-x2 = a.TE_lower_sharp_segment['x'][1]
-y2 = a.TE_lower_sharp_segment['y'][1]
-tang_lower = np.array([x1-x2, y1-y2])
-tang_lower = tang_lower/np.linalg.norm(tang_lower)
-tang_lower_x = tang_lower[0]
-tang_lower_y = tang_lower[1]
-norm_lower = np.array([-tang_lower_y, tang_lower_x])
-normpt = np.array([x2, y2]) + norm_lower*laminate_thickness
-x4 = normpt[0]
-y4 = normpt[1]
-plt.plot([x2, normpt[0]], [y2, normpt[1]], 'go-')
-x6 = x4 + tang_lower_x
-y6 = y4 + tang_lower_y
-# plt.plot([x4, x6], [y4, y6], 'go:')
-
-# find the intersection of the TE laminate thicknesses
-m64 = (y6-y4)/(x6-x4)
-m53 = (y5-y3)/(x5-x3)
-x_int = (m64*x4 - y4 - m53*x3 + y3)/(m64 - m53)
-y_int = m64*(x_int - x4) + y4
-plt.plot([x_int], [y_int], 'yp')
-
-# plot the inner surface of the TE reinforcement
-plt.plot([x3,x_int,x1], [y3,y_int,y1], 'mp-')
-plt.plot([x4,x_int,x1], [y4,y_int,y1], 'mp-')
-
-# save the inner surface of the TE reinforcement
-a.TE_inner_surf_upper = np.array([(x3,y3),(x_int,y_int),(x1,y1)], dtype=dtype)
-a.TE_inner_surf_lower = np.array([(x4,y4),(x_int,y_int),(x1,y1)], dtype=dtype)
-
-# -----
-
-# laminate_thickness = a.hTEuniax
-# # upper part of TE_segment
-# x0 = a.TE_segment['x'][0]
-# y0 = a.TE_segment['y'][0]
-# x1 = a.TE_segment['x'][1]
-# y1 = a.TE_segment['y'][1]
-# tang_upper = np.array([x1-x0, y1-y0])
-# tang_upper = tang_upper/np.linalg.norm(tang_upper)
-# tang_upper_x = tang_upper[0]
-# tang_upper_y = tang_upper[1]
-# norm_upper = -np.array([-tang_upper_y, tang_upper_x])
-# normpt = np.array([x0, y0]) + norm_upper*laminate_thickness
-# x3 = normpt[0]
-# y3 = normpt[1]
-# plt.plot([x0, x3], [y0, y3], 'go-')
-# x5 = x3 + tang_upper_x
-# y5 = y3 + tang_upper_y
-# plt.plot([x3, x5], [y3, y5], 'go:')
-
-# # lower part of TE_segment
-# x2 = a.TE_segment['x'][2]
-# y2 = a.TE_segment['y'][2]
-# tang_lower = np.array([x1-x2, y1-y2])
-# tang_lower = tang_lower/np.linalg.norm(tang_lower)
-# tang_lower_x = tang_lower[0]
-# tang_lower_y = tang_lower[1]
-# norm_lower = np.array([-tang_lower_y, tang_lower_x])
-# normpt = np.array([x2, y2]) + norm_lower*laminate_thickness
-# x4 = normpt[0]
-# y4 = normpt[1]
-# plt.plot([x2, normpt[0]], [y2, normpt[1]], 'go-')
-# x6 = x4 + tang_lower_x
-# y6 = y4 + tang_lower_y
-# plt.plot([x4, x6], [y4, y6], 'go:')
-
-# # find the intersection of the TE laminate thicknesses
-# m64 = (y6-y4)/(x6-x4)
-# m53 = (y5-y3)/(x5-x3)
-# x_int = (m64*x4 - y4 - m53*x3 + y3)/(m64 - m53)
-# y_int = m64*(x_int - x4) + y4
-# plt.plot([x_int], [y_int], 'yp')
-
-# # plot the inner surface of the TE reinforcement
-# plt.plot([x3,x_int], [y3,y_int], 'mp-')
-# plt.plot([x4,x_int], [y4,y_int], 'mp-')
-
-
-# plt.ylim([-0.1,0.1])
-# plt.xlim([2.6,2.9])
 plt.show()
 
 # ----------------------------------------------------------------------------
@@ -349,9 +308,9 @@ write_segment(f,a.TE_upper_main_segment,'trailing edge reinforcement, upper main
 curve_id = curve_id + 1
 write_segment(f,a.TE_upper_sharp_segment,'trailing edge reinforcement, upper sharp segment', curve_id)
 curve_id = curve_id + 1
-write_segment(f,a.TE_inner_surf_lower,'trailing edge reinforcement, inner surface, lower segment', curve_id)
-curve_id = curve_id + 8
-write_segment(f,a.TE_inner_surf_upper,'trailing edge reinforcement, inner surface, upper segment', curve_id)
+write_segment(f,a.TE_inner_surf_segment,'trailing edge reinforcement, inner surface', curve_id)
+# curve_id = curve_id + 8
+# write_segment(f,a.TE_inner_surf_upper,'trailing edge reinforcement, inner surface, upper segment', curve_id)
 
 f.close()
 
