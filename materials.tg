@@ -1,0 +1,17 @@
+c
+c assign dummmy ABAQUS materials
+c
+
+c material #1 (from Prof. Dong)
+abaqmats 1
+  aqelas
+    aqella c lamina material
+      40.0 c e1 (E1, Young's modulus, longitudinal direction)
+      10.0 c e2 (E2, Young's modulus, transverse direction)
+      0.20 c v12 (nu12, Poisson's ratio)
+      15.0 c g12 (G12, shear modulus)
+      10.0 c g13 (G13, shear modulus)
+       4.0 c g23 (G23, shear modulus)
+    ;
+  ;
+  aqdens 1.0; c density (rho)
