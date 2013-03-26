@@ -1,3 +1,12 @@
+"""
+A script that splits an airfoil curve into separate segments for each
+structural component: spar caps, shear webs, aft panels, etc.
+
+Author: Perry Roth-Johnson
+Last updated: March 25, 2013
+
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.interpolate as ipl
@@ -5,11 +14,23 @@ import scipy.interpolate as ipl
 dtype = [('x', 'f8'), ('y', 'f8')]
 
 class Airfoil:
+    """
+The Airfoil class contains methods to read in a file of airfoil coordinates,
+then splits the coordinates into segments for each structural component:
+spar caps, shear webs, aft panels, trailing edge reinforcement, etc.
+
+Usage:
+a = Airfoil('NACA 64-618','SNL100-00_v0/airfoils/NACA_64-618.txt')
+
+    """
     def __init__(self, name, coords_file, debug_flag=False):
         # set some global parameters
         self.name = name
+        # -----------------------------------------------------
+        #    GLOBAL PARAMETERS
+        # -----------------------------------------------------
         # hard code in some global parameters ... CHANGE THIS LATER
-        self.chord = 4.621      # chord length
+        self.chord = 4.621      # chord length [m]
         self.pitchaxis = 0.375  # pitch axis fraction
         self.hSC = 0.047        # spar cap height [m]
         self.bSC = 1.5          # spar cap base [m]
@@ -22,15 +43,18 @@ class Airfoil:
         self.hTEfoam = 0.010    # trailing edge reinforcement (foam) height [m]
         self.hLEpanel = 0.045   # leading edge panel height [m]
         self.hAFTpanel = 0.045  # aft panel height [m]
+        # set the trailing edge thickness to chord ratio [unitless]
+        self.TE_thickness_to_chord_ratio = 0.002
+        # -------------------------------------------------------
         # read in the coordinates
         self.coords = np.loadtxt(coords_file, comments='<', dtype=dtype)
+        # modify the trailing edge to have a finite thickness
+        self.coords['y'][-1] = self.TE_thickness_to_chord_ratio
         # translate the airfoil horizontally, so the pitch axis is at the origin
         self.coords['x'] = self.coords['x'] - self.pitchaxis
         # scale the airfoil to the full chord length
         self.coords['x'] = self.coords['x'] * self.chord
         self.coords['y'] = self.coords['y'] * self.chord
-        # # modify the trailing edge to have a finite thickness
-        # self.coords['y'][-1] = self.coords['y'][-1] + 2.0*(self.hTEfoam+self.hTEuniax)
         # save the upper and lower airfoil surfaces
         #   index of coordinate at leading edge
         self.LE_index = np.nonzero(self.coords['y']==0.0)[0][1]
@@ -39,6 +63,10 @@ class Airfoil:
         # self.plot_thickness_vs_chord()
 
     def plot_thickness_vs_chord(self):
+        """
+Plots the thickness of the airfoil versus the chord length.
+
+        """
         plt.figure()
         plt.axes().set_aspect('equal')
         t = []
@@ -51,10 +79,12 @@ class Airfoil:
         plt.show()
         return t
 
-    # def find_width_of_sharp_TE(self):
-
     def mark_off_regions(self):
-        # mark off regions for each structural component with vertical lines
+        """
+Plots color blocks to mark off the regions for each structural component. Each
+color block spans the plot from top to bottom.
+
+        """
         plt.figure()
         #   spar caps
         self.SC_left = -self.bSC/2.0
@@ -81,7 +111,14 @@ class Airfoil:
         plt.axvspan(self.aft_panel_left, self.aft_panel_right, facecolor='orange', edgecolor='orange')
 
     def find_edge_coords(self, x_edge):
-        # find the airfoil coordinates at the edges of each component
+        """
+Find the airfoil coordinates at the edges of each structural component.
+
+Returns two coordinate pairs as tuples, one coordinate pair for the lower
+surface (x_edge,y_edge_lower), and another for the upper surface of the airfoil
+(x_edge,y_edge_upper).
+
+        """
         # lower airfoil surface
         index_right = np.nonzero(self.lower['x']>x_edge)[0][-1]
         index_left = index_right + 1
@@ -108,6 +145,11 @@ class Airfoil:
         return ((x_edge,y_edge_lower),(x_edge,y_edge_upper))
 
     def save_edge_coords(self):
+        """
+Use the method find_edge_coords() to save edge coordinates for all structural
+components as attributes in the Airfoil class.
+
+        """
         self.aft_panel_right_coords = self.find_edge_coords(self.aft_panel_right)
         self.aft_panel_left_coords = self.find_edge_coords(self.aft_panel_left)
         self.SC_right_coords = self.find_edge_coords(self.SC_right)
@@ -125,6 +167,14 @@ class Airfoil:
         self.TE_reinf_left_coords = self.aft_panel_right_coords
 
     def extract_segment_along_airfoil_profile(self, left_coords, right_coords):
+        """
+Extract a single segment along the airfoil profile, given the left and right
+edge coordinates for that segment.
+
+Returns two numpy arrays of coordinates, one for the lower segment and another
+for the upper segment.
+
+        """
         # find the indices of the segment edges
         left_index_lower = np.nonzero(self.lower==np.array(left_coords[0],dtype=dtype))[0][0]
         right_index_lower = np.nonzero(self.lower==np.array(right_coords[0],dtype=dtype))[0][0]
@@ -136,6 +186,12 @@ class Airfoil:
         return (lower_segment, upper_segment)
 
     def extract_LE_segment(self):
+        """
+Extract the segment along the leading edge panel.
+
+Returns a numpy array of coordinates for the leading edge segment.
+
+        """
         # find the indices
         lower_index = np.nonzero(self.lower==np.array(self.LE_panel_right_coords[0],dtype=dtype))[0][0]
         upper_index = np.nonzero(self.upper==np.array(self.LE_panel_right_coords[1],dtype=dtype))[0][0]
@@ -146,6 +202,23 @@ class Airfoil:
         return LE_segment
 
     def extract_TE_segments(self):
+        """
+Extract the segments along the trailing edge reinforcement.
+
+Returns five numpy arrays of coordinates:
+(1) lower main segment: The main segment for the trailing edge reinforcement,
+    along the lower airfoil surface.
+(2) upper main segment: The main segment for the trailing edge reinforcement,
+    along the upper airfoil surface.
+(3) lower tip segment: An additional segment near the tip of the trailing edge
+    reinforcement, along the lower airfoil surface.
+(4) upper sharp segment: An additional segment near the tip of the trailing
+    edge reinforcement, along the upper airfoil surface.
+(5) inner surface segment: An additional segment near the tip of the trailing
+    edge reinforcement, along the interface between the upper and lower
+    laminates.
+
+        """
         # find the normal vectors on the upper and lower parts of the TE_segment
         laminate_thickness = self.hTEfoam+self.hTEuniax
         # upper sharp trailing edge segment ----------------------------------
@@ -222,6 +295,18 @@ class Airfoil:
         return (lower_main_segment, upper_main_segment, lower_sharp_segment, upper_sharp_segment, inner_surf_segment)
 
     def extract_all_segments_along_airfoil_profile(self):
+        """
+Extract all segments along the airfoil profile.
+
+Segments for each structural component are extracted in this order:
+(1) spar caps
+(2) aft panels
+(3) forward shear web
+(4) rear shear web
+(5) leading edge panel
+(6) trailing edge reinforcement
+
+        """
         (self.SC_lower_segment, self.SC_upper_segment) = self.extract_segment_along_airfoil_profile(self.SC_left_coords, self.SC_right_coords)
         (self.aft_panel_lower_segment, self.aft_panel_upper_segment) = self.extract_segment_along_airfoil_profile(self.aft_panel_left_coords, self.aft_panel_right_coords)
         (self.fwd_SW_lower_segment, self.fwd_SW_upper_segment) = self.extract_segment_along_airfoil_profile(self.fwd_SW_left_coords, self.fwd_SW_right_coords)
@@ -229,51 +314,46 @@ class Airfoil:
         self.LE_segment = self.extract_LE_segment()
         (self.TE_lower_main_segment, self.TE_upper_main_segment, self.TE_lower_sharp_segment, self.TE_upper_sharp_segment, self.TE_inner_surf_segment) = self.extract_TE_segments()
 
+# ----------------------------------------------------------------------------
+# executable statements:
 
-
+# import the airfoil
 a = Airfoil('NACA 64-618','SNL100-00_v0/airfoils/NACA_64-618.txt')
-# a.plot_thickness_vs_chord()
 a.mark_off_regions()
 a.save_edge_coords()
 a.extract_all_segments_along_airfoil_profile()
 
-# plot the airfoil profile
-# plt.plot(a.coords['x'],a.coords['y'],'x-')
+# set the plot size and aspect ratio
 plt.ylim([-2,2])
 plt.axes().set_aspect('equal')
 
-# plot the new lower and upper surface coords
-# plt.plot(a.lower['x'],a.lower['y'],'co')
-# plt.plot(a.upper['x'],a.upper['y'],'co')
-
-# plot segments
+# plot all segments
 plt.plot(a.SC_lower_segment['x'],a.SC_lower_segment['y'],'c^-')
 plt.plot(a.SC_upper_segment['x'],a.SC_upper_segment['y'],'y^-')
-
 plt.plot(a.aft_panel_lower_segment['x'],a.aft_panel_lower_segment['y'],'kv-')
 plt.plot(a.aft_panel_upper_segment['x'],a.aft_panel_upper_segment['y'],'rv-')
-
 plt.plot(a.fwd_SW_lower_segment['x'],a.fwd_SW_lower_segment['y'],'m<-')
 plt.plot(a.fwd_SW_upper_segment['x'],a.fwd_SW_upper_segment['y'],'m<-')
 plt.plot(a.rear_SW_lower_segment['x'],a.rear_SW_lower_segment['y'],'m<-')
 plt.plot(a.rear_SW_upper_segment['x'],a.rear_SW_upper_segment['y'],'m<-')
-
 plt.plot(a.LE_segment['x'],a.LE_segment['y'],'k+-')
-
 plt.plot(a.TE_lower_main_segment['x'],a.TE_lower_main_segment['y'],'yp-')
 plt.plot(a.TE_upper_main_segment['x'],a.TE_upper_main_segment['y'],'bp-')
 plt.plot(a.TE_lower_sharp_segment['x'],a.TE_lower_sharp_segment['y'],'rp-')
 plt.plot(a.TE_upper_sharp_segment['x'],a.TE_upper_sharp_segment['y'],'gp-')
 plt.plot(a.TE_inner_surf_segment['x'],a.TE_inner_surf_segment['y'],'c^--')
 
+# show the plot
 plt.show()
 
-# ----------------------------------------------------------------------------
-
-# write the segments to a file, segments.tg
+# write the segments to a file, segments.tg ----------------------------------
 f = open('segments.tg','w+')
 
 def write_segment(f,segment,segment_name,curve_number,comments='c'):
+    """
+Write a segment to a file, formatted as a 2D curve for a TrueGrid input file.
+
+    """
     f.write(comments + ' ' + segment_name + '\n')
     f.write('ld ' + str(curve_number) + ' lp2' + '\n')
     fmt = '{0:> 10.8f}' + '{1:> 14.8f}' + '\n'
@@ -281,6 +361,7 @@ def write_segment(f,segment,segment_name,curve_number,comments='c'):
         f.write(fmt.format(coord['x'], coord['y']))
     f.write(';\n\n')
 
+# Write all the segments extracted from the airfoil to a TrueGrid input file.
 curve_id = 1
 write_segment(f,a.TE_lower_sharp_segment,'trailing edge reinforcement, lower sharp segment', curve_id)
 curve_id = curve_id + 1
@@ -309,8 +390,5 @@ curve_id = curve_id + 1
 write_segment(f,a.TE_upper_sharp_segment,'trailing edge reinforcement, upper sharp segment', curve_id)
 curve_id = curve_id + 1
 write_segment(f,a.TE_inner_surf_segment,'trailing edge reinforcement, inner surface', curve_id)
-# curve_id = curve_id + 8
-# write_segment(f,a.TE_inner_surf_upper,'trailing edge reinforcement, inner surface, upper segment', curve_id)
-
+# close the file
 f.close()
-

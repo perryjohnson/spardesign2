@@ -32,6 +32,9 @@ title blade station #26
 c   build 2nd-order quadrilateral elements (with mid-side nodes)
 quadratic
 
+c import material properties (dummy materials for now...)
+include materials.tg
+
 c -------------------------------------------------------------
 
 c set some global parameters
@@ -255,7 +258,7 @@ ld 26 lpil 3 4; lpil 10 11;
 
 c display all 2D curves
 c gset 2.7 0 1
-lv
+c lv
 c interrupt
 
 c convert 2D curves to 3D curves
@@ -280,7 +283,6 @@ curd 18 ld2d3d 18 rt z 0 0 ;
 curd 19 ld2d3d 19 rt z 0 0 ;
 curd 20 ld2d3d 20 rt z 0 0 ;
 curd 21 ld2d3d 21 rt z 0 0 ;
-c curd 22 ld2d3d 22 rt z 0 0 ;
 curd 23 ld2d3d 23 rt z 0 0 ;
 curd 24 ld2d3d 24 rt z 0 0 ;
 curd 25 ld2d3d 25 rt z 0 0 ;
@@ -288,46 +290,68 @@ curd 26 ld2d3d 26 rt z 0 0 ;
 
 c PART 1: forward shear web
 include fwd_SW.tg
+eset 0 0 1 0 0 1 = fwdSW
+mate 1
 c interrupt
 
 c PART 2: rear shear web
 include rear_SW.tg
+eset 0 0 1 0 0 1 = rearSW
+mate 1
 c interrupt
 
 c PART 3: lower main TE reinforcement
 include lower_main_TE_reinf.tg
+eset 0 0 1 0 0 1 = lwMainTE
+mate 1
 c interrupt
 
 c PART 4: upper main TE reinforcement
 include upper_main_TE_reinf.tg
+eset 0 0 1 0 0 1 = upMainTE
+mate 1
 c interrupt
 
 c PART 5: lower aft panel
 include lower_aft_panel.tg
+eset 0 0 1 0 0 1 = loweraft
+mate 1
 c interrupt
 
 c PART 6: upper aft panel
 include upper_aft_panel.tg
+eset 0 0 1 0 0 1 = upperaft
+mate 1
 c interrupt
 
 c PART 7: lower spar cap
 include lower_SC.tg
+eset 0 0 1 0 0 1 = lowerSC
+mate 1
 c interrupt
 
 c PART 8: upper spar cap
 include upper_SC.tg
+eset 0 0 1 0 0 1 = upperSC
+mate 1
 c interrupt
 
 c PART 9: LE panel
 include LE_panel.tg
+eset 0 0 1 0 0 1 = LEpanel
+mate 1
 c interrupt
 
 c PART 10: upper sharp TE reinforcement
 include upper_sharp_TE_reinf.tg
+eset 0 0 1 0 0 1 = upShpTE
+mate 1
 c interrupt
 
 c PART 11: lower sharp TE reinforcement
 include lower_sharp_TE_reinf.tg
+eset 0 0 1 0 0 1 = lwShpTE
+mate 1
 c interrupt
 
 c display all 3D curves
@@ -335,13 +359,14 @@ c dacd
 c display 3D curve labels
 c labels crv
 c display the mesh
-disp
+c disp
 
 c switch to "merge" mode, to display all parts at once
 merge
 c interrupt
-c delete redundant nodes at part boundaries
-stp 0.0002  c tolerance = 0.0002
+
+c delete redundant nodes at part boundaries (tolerance = 0.002)
+stp 0.002
 
 c display the mesh in "filled" mode
 c tvv
@@ -352,7 +377,7 @@ c display block boundary labels
 c labels bb
 
 c write the output file to disk
-c write
+write
 
 c quit TrueGrid
-c exit
+exit
