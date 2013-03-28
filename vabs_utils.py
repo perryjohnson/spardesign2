@@ -3,7 +3,7 @@ A module to translate data from a 2D cross-section grid file (from TrueGrid)
 into a VABS input file.
 
 Author: Perry Roth-Johnson
-Last updated: March 26, 2013
+Last updated: March 28, 2013
 
 """
 
@@ -121,9 +121,23 @@ debug_flag=True)
 
 
     def _write_materials(self):
-        self.vabs_file.write('1   0   # Foam\n')
-        self.vabs_file.write('2.56000e+08   3.00000e-01\n')
-        self.vabs_file.write('2.00000e+02\n')
+        # write material properties  # HARDCODED FOR FOAM! CHANGE LATER!
+        mat_id = 1
+        orth = 0
+        name = 'Foam'
+        E = 2.56000e+08  # Young's modulus = 0.256 GPa
+        nu = 3.00000e-01  # Poisson's ratio = 0.3
+        rho = 2.00000e+02  # density = 200 kg/m^3
+        isotropic_ln1 = '{0:<4d}{1:<4d}# {2}\n'
+        isotropic_ln2 = '{3:>11.5e}   {4:>11.5e}\n'
+        isotropic_ln3 = '{5:>11.5e}\n'
+        isotropic_fmt = isotropic_ln1 + isotropic_ln2 + isotropic_ln3
+        self.vabs_file.write(isotropic_fmt.format(mat_id, orth, name,
+                                                  E, nu,
+                                                  rho))
+        # self.vabs_file.write('1   0   # Foam\n')
+        # self.vabs_file.write('2.56000e+08   3.00000e-01\n')
+        # self.vabs_file.write('2.00000e+02\n')
 
 
     def _write_input_file(self, debug_flag=False):
