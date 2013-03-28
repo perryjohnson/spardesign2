@@ -23,7 +23,7 @@ Usage:
 a = Airfoil('NACA 64-618','SNL100-00_v0/airfoils/NACA_64-618.txt')
 
     """
-    def __init__(self, name, coords_file, debug_flag=False):
+    def __init__(self, name, coords_file):
         # set some global parameters
         self.name = name
         # -----------------------------------------------------
@@ -60,7 +60,7 @@ a = Airfoil('NACA 64-618','SNL100-00_v0/airfoils/NACA_64-618.txt')
         self.LE_index = np.nonzero(self.coords['y']==0.0)[0][1]
         self.upper = self.coords[self.LE_index:]
         self.lower = self.coords[:self.LE_index+1]
-        # self.plot_thickness_vs_chord()
+
 
     def plot_thickness_vs_chord(self):
         """
@@ -73,42 +73,52 @@ Plots the thickness of the airfoil versus the chord length.
         for i in range(len(self.lower)):
             t.append(self.upper[::-1]['y'][i] - self.lower['y'][i])
         plt.plot(self.lower['x'],t,'b+-')
-        plt.plot([self.chord-self.pitchaxis*self.chord-self.bTEreinf, self.chord-self.pitchaxis*self.chord],
-                 [(self.hTEfoam+self.hTEuniax)*2.0, (self.hTEfoam+self.hTEuniax)*2.0],'r-')
-        plt.ylim([-0.5,1.5])
         plt.show()
         return t
 
-    def mark_off_regions(self):
+
+    def save_region_edges(self):
+        """
+Save the x-coordinates of the region edges for each structural component.
+
+        """
+        # LE panel
+        self.LE_panel_left = -self.pitchaxis*self.chord
+        self.LE_panel_right = -self.bSC/2.0-self.bSW
+        # spar caps
+        self.SC_left = -self.bSC/2.0
+        self.SC_right = self.bSC/2.0
+        # shear webs
+        self.fwd_SW_left = -self.bSC/2.0-self.bSW
+        self.fwd_SW_right = -self.bSC/2.0
+        self.rear_SW_left = self.bSC/2.0
+        self.rear_SW_right = self.bSC/2.0+self.bSW
+        # aft panels
+        self.aft_panel_left = self.bSC/2.0+self.bSW
+        self.aft_panel_right = -self.pitchaxis*self.chord+self.chord-self.bTEreinf
+        # TE reinforcement
+        self.TE_reinf_left = -self.pitchaxis*self.chord+self.chord-self.bTEreinf
+        self.TE_reinf_right = -self.pitchaxis*self.chord+self.chord
+
+
+    def plot_region_edges(self):
         """
 Plots color blocks to mark off the regions for each structural component. Each
 color block spans the plot from top to bottom.
 
         """
-        plt.figure()
-        #   spar caps
-        self.SC_left = -self.bSC/2.0
-        self.SC_right = self.bSC/2.0
-        plt.axvspan(self.SC_left, self.SC_right, facecolor='cyan', edgecolor='cyan')
-        #   shear webs
-        self.fwd_SW_left = -self.bSC/2.0-self.bSW
-        self.fwd_SW_right = -self.bSC/2.0
-        plt.axvspan(self.fwd_SW_left, self.fwd_SW_right, facecolor='yellow', edgecolor='yellow')
-        self.rear_SW_left = self.bSC/2.0
-        self.rear_SW_right = self.bSC/2.0+self.bSW
-        plt.axvspan(self.rear_SW_left, self.rear_SW_right, facecolor='yellow', edgecolor='yellow')
-        #   LE panel
-        self.LE_panel_left = -self.pitchaxis*self.chord
-        self.LE_panel_right = -self.bSC/2.0-self.bSW
+        # LE panel
         plt.axvspan(self.LE_panel_left, self.LE_panel_right, facecolor='magenta', edgecolor='magenta')
-        #   TE reinforcement
-        self.TE_reinf_left = -self.pitchaxis*self.chord+self.chord-self.bTEreinf
-        self.TE_reinf_right = -self.pitchaxis*self.chord+self.chord
-        plt.axvspan(self.TE_reinf_left, self.TE_reinf_right, facecolor='pink', edgecolor='pink')
-        #   aft panels
-        self.aft_panel_left = self.bSC/2.0+self.bSW
-        self.aft_panel_right = -self.pitchaxis*self.chord+self.chord-self.bTEreinf
+        # spar caps
+        plt.axvspan(self.SC_left, self.SC_right, facecolor='cyan', edgecolor='cyan')
+        # shear webs
+        plt.axvspan(self.fwd_SW_left, self.fwd_SW_right, facecolor='yellow', edgecolor='yellow')
+        plt.axvspan(self.rear_SW_left, self.rear_SW_right, facecolor='yellow', edgecolor='yellow')
+        # aft panels
         plt.axvspan(self.aft_panel_left, self.aft_panel_right, facecolor='orange', edgecolor='orange')
+        # TE reinforcement
+        plt.axvspan(self.TE_reinf_left, self.TE_reinf_right, facecolor='pink', edgecolor='pink')
+
 
     def find_edge_coords(self, x_edge):
         """
@@ -125,7 +135,7 @@ surface (x_edge,y_edge_lower), and another for the upper surface of the airfoil
         f = ipl.interp1d(self.lower[index_right:index_left+1][::-1]['x'],
                          self.lower[index_right:index_left+1][::-1]['y'])
         y_edge_lower = float(f(x_edge))
-        plt.plot(x_edge,y_edge_lower,'ro')
+        # plt.plot(x_edge,y_edge_lower,'ro')
         temp = np.append(self.lower[:index_left],
                          np.array((x_edge,y_edge_lower),
                                   dtype=dtype))
@@ -137,12 +147,13 @@ surface (x_edge,y_edge_lower), and another for the upper surface of the airfoil
         f = ipl.interp1d(self.upper[index_left:index_right+1]['x'],
                          self.upper[index_left:index_right+1]['y'])
         y_edge_upper = float(f(x_edge))
-        plt.plot(x_edge,y_edge_upper,'gs')
+        # plt.plot(x_edge,y_edge_upper,'gs')
         temp = np.append(self.upper[:index_right],
                          np.array((x_edge,y_edge_upper),
                                   dtype=dtype))
         self.upper = np.append(temp, self.upper[index_right:])
         return ((x_edge,y_edge_lower),(x_edge,y_edge_upper))
+
 
     def save_edge_coords(self):
         """
@@ -166,6 +177,7 @@ components as attributes in the Airfoil class.
         # TE_reinf_left_coords are the same as aft_panel_right_coords
         self.TE_reinf_left_coords = self.aft_panel_right_coords
 
+
     def extract_segment_along_airfoil_profile(self, left_coords, right_coords):
         """
 Extract a single segment along the airfoil profile, given the left and right
@@ -185,6 +197,7 @@ for the upper segment.
         upper_segment = self.upper[left_index_upper:right_index_upper+1]
         return (lower_segment, upper_segment)
 
+
     def extract_LE_segment(self):
         """
 Extract the segment along the leading edge panel.
@@ -200,6 +213,7 @@ Returns a numpy array of coordinates for the leading edge segment.
         upper_segment = self.upper[:upper_index+1]
         LE_segment = np.append(lower_segment, upper_segment[1:])
         return LE_segment
+
 
     def extract_TE_segments(self):
         """
@@ -294,6 +308,7 @@ Returns five numpy arrays of coordinates:
         inner_surf_segment = np.array([(x_int,y_int),(x8,y8)], dtype=dtype)
         return (lower_main_segment, upper_main_segment, lower_sharp_segment, upper_sharp_segment, inner_surf_segment)
 
+
     def extract_all_segments_along_airfoil_profile(self):
         """
 Extract all segments along the airfoil profile.
@@ -314,81 +329,31 @@ Segments for each structural component are extracted in this order:
         self.LE_segment = self.extract_LE_segment()
         (self.TE_lower_main_segment, self.TE_upper_main_segment, self.TE_lower_sharp_segment, self.TE_upper_sharp_segment, self.TE_inner_surf_segment) = self.extract_TE_segments()
 
-# ----------------------------------------------------------------------------
-# executable statements:
 
-# import the airfoil
-a = Airfoil('NACA 64-618','SNL100-00_v0/airfoils/NACA_64-618.txt')
-a.mark_off_regions()
-a.save_edge_coords()
-a.extract_all_segments_along_airfoil_profile()
+    def plot_all_segments(self):
+        """
+Plot all the segments along the airfoil profile with different symbols.
 
-# set the plot size and aspect ratio
-plt.ylim([-2,2])
-plt.axes().set_aspect('equal')
-
-# plot all segments
-plt.plot(a.SC_lower_segment['x'],a.SC_lower_segment['y'],'c^-')
-plt.plot(a.SC_upper_segment['x'],a.SC_upper_segment['y'],'y^-')
-plt.plot(a.aft_panel_lower_segment['x'],a.aft_panel_lower_segment['y'],'kv-')
-plt.plot(a.aft_panel_upper_segment['x'],a.aft_panel_upper_segment['y'],'rv-')
-plt.plot(a.fwd_SW_lower_segment['x'],a.fwd_SW_lower_segment['y'],'m<-')
-plt.plot(a.fwd_SW_upper_segment['x'],a.fwd_SW_upper_segment['y'],'m<-')
-plt.plot(a.rear_SW_lower_segment['x'],a.rear_SW_lower_segment['y'],'m<-')
-plt.plot(a.rear_SW_upper_segment['x'],a.rear_SW_upper_segment['y'],'m<-')
-plt.plot(a.LE_segment['x'],a.LE_segment['y'],'k+-')
-plt.plot(a.TE_lower_main_segment['x'],a.TE_lower_main_segment['y'],'yp-')
-plt.plot(a.TE_upper_main_segment['x'],a.TE_upper_main_segment['y'],'bp-')
-plt.plot(a.TE_lower_sharp_segment['x'],a.TE_lower_sharp_segment['y'],'rp-')
-plt.plot(a.TE_upper_sharp_segment['x'],a.TE_upper_sharp_segment['y'],'gp-')
-plt.plot(a.TE_inner_surf_segment['x'],a.TE_inner_surf_segment['y'],'c^--')
-
-# show the plot
-plt.show()
-
-# write the segments to a file, segments.tg ----------------------------------
-f = open('segments.tg','w+')
-
-def write_segment(f,segment,segment_name,curve_number,comments='c'):
-    """
-Write a segment to a file, formatted as a 2D curve for a TrueGrid input file.
-
-    """
-    f.write(comments + ' ' + segment_name + '\n')
-    f.write('ld ' + str(curve_number) + ' lp2' + '\n')
-    fmt = '{0:> 10.8f}' + '{1:> 14.8f}' + '\n'
-    for coord in segment:
-        f.write(fmt.format(coord['x'], coord['y']))
-    f.write(';\n\n')
-
-# Write all the segments extracted from the airfoil to a TrueGrid input file.
-curve_id = 1
-write_segment(f,a.TE_lower_sharp_segment,'trailing edge reinforcement, lower sharp segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.TE_lower_main_segment,'trailing edge reinforcement, lower main segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.aft_panel_lower_segment,'aft panel, lower segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.rear_SW_lower_segment,'rear shear web, lower segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.SC_lower_segment,'spar cap, lower segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.fwd_SW_lower_segment,'forward shear web, lower segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.LE_segment,'leading edge panel, segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.fwd_SW_upper_segment,'forward shear web, upper segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.SC_upper_segment,'spar cap, upper segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.rear_SW_upper_segment,'rear shear web, upper segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.aft_panel_upper_segment,'aft panel, upper segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.TE_upper_main_segment,'trailing edge reinforcement, upper main segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.TE_upper_sharp_segment,'trailing edge reinforcement, upper sharp segment', curve_id)
-curve_id = curve_id + 1
-write_segment(f,a.TE_inner_surf_segment,'trailing edge reinforcement, inner surface', curve_id)
-# close the file
-f.close()
+        """
+        plt.figure()
+        plt.axes().set_aspect('equal')
+        self.save_region_edges()
+        self.plot_region_edges()
+        self.save_edge_coords()
+        self.extract_all_segments_along_airfoil_profile()
+        plt.plot(self.LE_segment['x'],self.LE_segment['y'],'ko-')
+        plt.plot(self.fwd_SW_upper_segment['x'],self.fwd_SW_upper_segment['y'],'bs-')
+        plt.plot(self.fwd_SW_lower_segment['x'],self.fwd_SW_lower_segment['y'],'rs-')
+        plt.plot(self.SC_upper_segment['x'],self.SC_upper_segment['y'],'m^-')
+        plt.plot(self.SC_lower_segment['x'],self.SC_lower_segment['y'],'g^-')
+        plt.plot(self.rear_SW_upper_segment['x'],self.rear_SW_upper_segment['y'],'bo-')
+        plt.plot(self.rear_SW_lower_segment['x'],self.rear_SW_lower_segment['y'],'ro-')
+        plt.plot(self.aft_panel_upper_segment['x'],self.aft_panel_upper_segment['y'],'ms-')
+        plt.plot(self.aft_panel_lower_segment['x'],self.aft_panel_lower_segment['y'],'gs-')
+        plt.plot(self.TE_upper_main_segment['x'],self.TE_upper_main_segment['y'],'b^-')
+        plt.plot(self.TE_lower_main_segment['x'],self.TE_lower_main_segment['y'],'r^-')
+        plt.plot(self.TE_upper_sharp_segment['x'],self.TE_upper_sharp_segment['y'],'mo-')
+        plt.plot(self.TE_lower_sharp_segment['x'],self.TE_lower_sharp_segment['y'],'go-')
+        plt.plot(self.TE_inner_surf_segment['x'],self.TE_inner_surf_segment['y'],'c^--')
+        plt.show()
+        

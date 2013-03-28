@@ -227,11 +227,11 @@ self.node_array
             if node_match: # if we find a node
                 # save the first 3 entries; drop x1 (last entry)
                 (node_no, x2, x3) = line.strip().split(',')[:-1]
-                list_of_node_tuples.append((int(node_no), float(x2), float(x3)))
+                list_of_node_tuples.append((int(node_no), float(x2), float(x3), -1))
         self.number_of_nodes = len(list_of_node_tuples)
         # initialize a structured array
         self.node_array = np.zeros((self.number_of_nodes,),
-            dtype=[('node_no', 'i4'), ('x2', 'f8'), ('x3', 'f8')])
+            dtype=[('node_no', 'i4'), ('x2', 'f8'), ('x3', 'f8'), ('is_corner_node', 'i4')])
         # save the nodes in the structured array
         self.node_array[:] = list_of_node_tuples
 
@@ -300,6 +300,47 @@ self.element_array
                     ('node3', 'i4'), ('node4', 'i4')])
         # save the nodes in the structured array
         self.element_array[:] = list_of_element_tuples
+
+
+    def id_corner_and_midside_nodes(self, debug_flag=False):
+        """
+Identifies which nodes are corner nodes and midside nodes.
+
+If node[i] is a corner node, then self.node_array[i]['is_corner_node'] = 1.
+If node[i] is a midside node, then self.node_array[i]['is_corner_node'] = 0.
+
+If node[i] is neither, then self.node_array[i]['is_corner_node'] = -1.
+(This is the default value set in self._parse_nodes().)
+
+        """
+        for elem in self.element_array:
+            # corner nodes
+            corner_nodes = [elem['node1'], elem['node2'], elem['node3'], elem['node4']]
+            for node in corner_nodes:
+                self.node_array[node-1]['is_corner_node'] = 1
+            # midside nodes
+            midside_nodes = [elem['node5'], elem['node6'], elem['node7'], elem['node8']]
+            for node in midside_nodes:
+                self.node_array[node-1]['is_corner_node'] = 0
+        # count the total number of corner and midside nodes
+        self.number_of_corner_nodes = len(np.nonzero(self.node_array['is_corner_node']==1)[0])
+        self.number_of_midside_nodes = len(np.nonzero(self.node_array['is_corner_node']==0)[0])
+        # check that all nodes were assigned as corner or midside nodes
+        # (no -1 values should exist in self.node_array['is_corner_node'])
+        num_unassigned_nodes = len(np.nonzero(self.node_array['is_corner_node']==-1)[0])
+        if debug_flag and num_unassigned_nodes > 0:
+            print 'WARNING: not all nodes were assigned as corner or midside nodes'
+
+
+    def id_labels_for_midside_nodes(self):
+        """
+Identifies the first node label (lower label) and second node label (higher
+label) for each midside node.
+
+This information is only needed for the SAFE input file.
+
+        """
+        return
 
 
     def _parse_elementsets(self, debug_flag=False):
@@ -405,6 +446,7 @@ g.elementset_array
         self._find_block_starts()
         self._parse_nodes()
         self._parse_elements(debug_flag=debug_flag)
+        self.id_corner_and_midside_nodes(debug_flag=debug_flag)
         self._parse_elementsets(debug_flag=debug_flag)
         # Sort element_array by element number.
         self.element_array.sort(order='elem_no')
@@ -415,4 +457,6 @@ g.elementset_array
             print '.element_array[0] =', self.element_array[0]
             print '.elementset_array[0] =', self.elementset_array[0]
             print 'number of nodes: ' + str(self.number_of_nodes)
+            print '    corner nodes: ' + str(self.number_of_corner_nodes)
+            print '    midside nodes: ' + str(self.number_of_midside_nodes)
             print 'number of elements: ' + str(self.number_of_elements)

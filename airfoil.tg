@@ -21,14 +21,14 @@ c Aft panel:             45 mm (foam)
 c -------------------------------------------------------------
 
 c set the name of the mesh output file
-mof blade_station_26_abq.txt
+mof stn26.abq
 
 c set the output file type
 abaqus
 
 c set some abaqus-specific parameters
 c   assign a title to the problem
-title blade station #26
+title blade station 26
 c   build 2nd-order quadrilateral elements (with mid-side nodes)
 quadratic
 

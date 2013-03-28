@@ -2,9 +2,9 @@ tghist
 tsave*
 *.pyc
 segments.tg
-blade_station_*.*
 *.exe
 *.dll
 license
-master_bbs.tg
-open_tgscripts.bat
+stn26*
+*.m
+clean.bat
