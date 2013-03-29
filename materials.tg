@@ -2,16 +2,64 @@ c
 c assign dummmy ABAQUS materials
 c
 
-c material #1 (from Prof. Dong)
+
+c uniaxial GFRP: [0]_2             (2 plies)
+c biaxial GFRP:  [+/-45]_4         (8 plies)
+c triaxial GFRP: [+/-45]_2 [0]_2   (6 plies)
+c foam
+
+
+c material #1: uniaxial GFRP (E-LT-5500/EP-3)
 abaqmats 1
   aqelas
-    aqella c lamina material
-      40.0 c e1 (E1, Young's modulus, longitudinal direction)
-      10.0 c e2 (E2, Young's modulus, transverse direction)
-      0.20 c v12 (nu12, Poisson's ratio)
-      15.0 c g12 (G12, shear modulus)
-      10.0 c g13 (G13, shear modulus)
-       4.0 c g23 (G23, shear modulus)
+    aqella       c lamina material
+      41.8E+09   c e1 (E1, Young's modulus, longitudinal direction)
+      14.0E+09   c e2 (E2, Young's modulus, transverse direction)
+      0.28       c v12 (nu12, Poisson's ratio)
+      2.63E+09   c g12 (G12, shear modulus)
+      2.63E+09   c g13 (G13, shear modulus)
+      2.63E+09   c g23 (G23, shear modulus)
     ;
   ;
-  aqdens 1.0; c density (rho)
+  aqdens 1.92E+03;  c density (rho)
+
+
+c material #2: biaxial GFRP (Saertex/EP-3)
+abaqmats 2
+  aqelas
+    aqella       c lamina material
+      13.6E+09   c e1 (E1, Young's modulus, longitudinal direction)
+      13.3E+09   c e2 (E2, Young's modulus, transverse direction)
+      0.51       c v12 (nu12, Poisson's ratio)
+      11.8E+09   c g12 (G12, shear modulus)
+      11.8E+09   c g13 (G13, shear modulus)
+      11.8E+09   c g23 (G23, shear modulus)
+    ;
+  ;
+  aqdens 1.78E+03;  c density (rho)
+
+
+c material #3: triaxial GFRP (SNL Triax)
+abaqmats 3
+  aqelas
+    aqella       c lamina material
+      27.7E+09   c e1 (E1, Young's modulus, longitudinal direction)
+      13.65E+09  c e2 (E2, Young's modulus, transverse direction)
+      0.39       c v12 (nu12, Poisson's ratio)
+      1.85E+09   c g12 (G12, shear modulus)
+      1.85E+09   c g13 (G13, shear modulus)
+      1.85E+09   c g23 (G23, shear modulus)
+    ;
+  ;
+  aqdens 1.92E+03;  c density (rho)
+
+
+c material #4: foam
+abaqmats 4
+  aqelas
+    aqelis       c isotropic material
+      0.256E+09  c modulus (E, Young's modulus)
+      0.3        c ratio (nu, Poisson's ratio)
+    ;
+  ;
+  aqdens 0.20E+03;  c density (rho)

@@ -91,8 +91,10 @@ ld 3 lp2
 c rear shear web, lower segment
 ld 4 lp2
  0.75000000   -0.19929366
+ 0.75300000   -0.19890069
  0.80538023   -0.19203952
  0.80867500   -0.19160052
+ 0.83300000   -0.18807202
  0.83600000   -0.18763685
 ;
 
@@ -116,8 +118,10 @@ ld 5 lp2
 c forward shear web, lower segment
 ld 6 lp2
 -0.83600000   -0.24401592
+-0.83300000   -0.24431125
 -0.80867500   -0.24670595
 -0.78490920   -0.24862828
+-0.75300000   -0.25071753
 -0.75000000   -0.25091395
 ;
 
@@ -163,8 +167,10 @@ ld 7 lp2
 c forward shear web, upper segment
 ld 8 lp2
 -0.83600000    0.46859933
+-0.83300000    0.46931025
 -0.83244080    0.46944277
 -0.80867500    0.47430406
+-0.75300000    0.48409639
 -0.75000000    0.48462404
 ;
 
@@ -188,8 +194,10 @@ ld 9 lp2
 c rear shear web, upper segment
 ld 10 lp2
  0.75000000    0.50420178
+ 0.75300000    0.50379210
  0.80867500    0.49618912
  0.81196977    0.49569467
+ 0.83300000    0.49212371
  0.83600000    0.49161430
 ;
 
@@ -233,6 +241,54 @@ ld 14 lp2
  2.88812500    0.00462100
 ;
 
+c forward shear web, left segment
+ld 23 lp2
+-0.83600000   -0.24401592
+-0.83600000    0.46859933
+;
+
+c forward shear web, right segment
+ld 24 lp2
+-0.75000000   -0.25091395
+-0.75000000    0.48462404
+;
+
+c rear shear web, left segment
+ld 25 lp2
+ 0.75000000   -0.19929366
+ 0.75000000    0.50420178
+;
+
+c rear shear web, right segment
+ld 26 lp2
+ 0.83600000   -0.18763685
+ 0.83600000    0.49161430
+;
+
+c forward shear web, foam core, left segment
+ld 27 lp2
+-0.83300000   -0.24431125
+-0.83300000    0.46931025
+;
+
+c forward shear web, foam core, right segment
+ld 28 lp2
+-0.75300000   -0.25071753
+-0.75300000    0.48409639
+;
+
+c rear shear web, foam core, left segment
+ld 29 lp2
+ 0.75300000   -0.19890069
+ 0.75300000    0.50379210
+;
+
+c rear shear web, foam core, right segment
+ld 30 lp2
+ 0.83300000   -0.18807202
+ 0.83300000    0.49212371
+;
+
 
 c draw guide curves for the laminate thicknesses
 c use a normal offset (lod) to make guide curves
@@ -248,13 +304,13 @@ ld 17 lod 5 [%hSC]
 ld 19 lod 9 [-%hSC]
 ld 20 lod 11 [-%hAFTpanel]
 
-c draw guide curves for the shear webs
-c   forward shear web
-ld 23 lpil 6 7; lpil 7 8;
-ld 24 lpil 5 6; lpil 8 9;
-c   rear shear web
-ld 25 lpil 4 5; lpil 9 10;
-ld 26 lpil 3 4; lpil 10 11;
+C c draw guide curves for the shear webs
+C c   forward shear web
+C ld 23 lpil 6 7; lpil 7 8;
+C ld 24 lpil 5 6; lpil 8 9;
+C c   rear shear web
+C ld 25 lpil 4 5; lpil 9 10;
+C ld 26 lpil 3 4; lpil 10 11;
 
 c display all 2D curves
 c gset 2.7 0 1
@@ -287,71 +343,91 @@ curd 23 ld2d3d 23 rt z 0 0 ;
 curd 24 ld2d3d 24 rt z 0 0 ;
 curd 25 ld2d3d 25 rt z 0 0 ;
 curd 26 ld2d3d 26 rt z 0 0 ;
+curd 27 ld2d3d 27 rt z 0 0 ;
+curd 28 ld2d3d 28 rt z 0 0 ;
+curd 29 ld2d3d 29 rt z 0 0 ;
+curd 30 ld2d3d 30 rt z 0 0 ;
 
 c PART 1: forward shear web
 include fwd_SW.tg
 eset 0 0 1 0 0 1 = fwdSW
-mate 1
+c assign biaxial material to the shear web (everywhere)
+mate 2
+c assign foam material to the shear web (in the core, overwrites earlier biax)
+mt 
+c   region
+    2 0 1  c  i-min j-min k-min
+    3 0 1  c  i-max j-max k-max
+c   material_#
+    4
 c interrupt
 
 c PART 2: rear shear web
 include rear_SW.tg
 eset 0 0 1 0 0 1 = rearSW
-mate 1
+c assign biaxial material to the shear web (everywhere)
+mate 2
+c assign foam material to the shear web (in the core, overwrites earlier biax)
+mt 
+c   region
+    2 0 1  c  i-min j-min k-min
+    3 0 1  c  i-max j-max k-max
+c   material_#
+    4
 c interrupt
 
 c PART 3: lower main TE reinforcement
 include lower_main_TE_reinf.tg
 eset 0 0 1 0 0 1 = lwMainTE
-mate 1
+mate 4
 c interrupt
 
 c PART 4: upper main TE reinforcement
 include upper_main_TE_reinf.tg
 eset 0 0 1 0 0 1 = upMainTE
-mate 1
+mate 4
 c interrupt
 
 c PART 5: lower aft panel
 include lower_aft_panel.tg
 eset 0 0 1 0 0 1 = loweraft
-mate 1
+mate 4
 c interrupt
 
 c PART 6: upper aft panel
 include upper_aft_panel.tg
 eset 0 0 1 0 0 1 = upperaft
-mate 1
+mate 4
 c interrupt
 
 c PART 7: lower spar cap
 include lower_SC.tg
 eset 0 0 1 0 0 1 = lowerSC
-mate 1
+mate 4
 c interrupt
 
 c PART 8: upper spar cap
 include upper_SC.tg
 eset 0 0 1 0 0 1 = upperSC
-mate 1
+mate 4
 c interrupt
 
 c PART 9: LE panel
 include LE_panel.tg
 eset 0 0 1 0 0 1 = LEpanel
-mate 1
+mate 4
 c interrupt
 
 c PART 10: upper sharp TE reinforcement
 include upper_sharp_TE_reinf.tg
 eset 0 0 1 0 0 1 = upShpTE
-mate 1
+mate 4
 c interrupt
 
 c PART 11: lower sharp TE reinforcement
 include lower_sharp_TE_reinf.tg
 eset 0 0 1 0 0 1 = lwShpTE
-mate 1
+mate 4
 c interrupt
 
 c display all 3D curves
@@ -377,7 +453,7 @@ c display block boundary labels
 c labels bb
 
 c write the output file to disk
-write
+c write
 
 c quit TrueGrid
-exit
+c exit

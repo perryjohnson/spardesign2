@@ -8,3 +8,4 @@ license
 stn26*
 *.m
 clean.bat
+*_pandas*

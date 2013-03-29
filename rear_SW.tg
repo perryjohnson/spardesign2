@@ -2,14 +2,14 @@ c make a part for the rear shear web
 block
 c specify the node distribution
 c   i-list
-    1 2;
+    1 2 3 4;
 c   j-list
     1 2 17 18;
 c   k-list (use -1 to use 2D shell elements)
     -1;
 c specify the coordinates
 c   x-coordinates
-    [%bSC/2.0-0.2] [%bSC/2.0-0.1];
+    [%bSC/2.0-0.2] [%bSC/2.0-0.17] [%bSC/2.0-0.13] [%bSC/2.0-0.1];
 c   y-coordinates
     [-%hSW/2.0] [-%hSW/2.0+%hLEpanel] [%hSW/2.0-%hLEpanel] [%hSW/2.0];
 c   z-coordinates
@@ -28,8 +28,8 @@ c   curve_id
 c attach the right edge
 cure
 c   region
-    2 0 1  c  i-min j-min k-min
-    2 0 1  c  i-max j-max k-max
+    4 0 1  c  i-min j-min k-min
+    4 0 1  c  i-max j-max k-max
 c   curve_id
     26
 
@@ -49,14 +49,29 @@ c   region
 c   curve_id
     10
 
+c attach the left edge of the foam core
+cure
+c   region
+    2 0 1  c  i-min j-min k-min   (0 picks extreme min)
+    2 0 1  c  i-max j-max k-max   (0 picks extreme max)
+c   curve_id
+    29
+
+c attach the right edge of the foam core
+cure
+c   region
+    3 0 1  c  i-min j-min k-min
+    3 0 1  c  i-max j-max k-max
+c   curve_id
+    30
 
 c make block boundaries ------------------------------------------------------
 
 c make block boundary (master #4) on right edge, near bottom
 bb
 c   region
-    2 1 1  c  i-min j-min k-min
-    2 2 1  c  i-max j-max k-max
+    4 1 1  c  i-min j-min k-min
+    4 2 1  c  i-max j-max k-max
 c   interface
     4;
 
@@ -79,7 +94,7 @@ c   interface
 c make block boundary (master #11) on right edge, near top
 bb
 c   region
-    2 3 1  c  i-min j-min k-min
-    2 4 1  c  i-max j-max k-max
+    4 3 1  c  i-min j-min k-min
+    4 4 1  c  i-max j-max k-max
 c   interface
     11;

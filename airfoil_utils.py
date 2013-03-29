@@ -90,8 +90,12 @@ Save the x-coordinates of the region edges for each structural component.
         self.SC_right = self.bSC/2.0
         # shear webs
         self.fwd_SW_left = -self.bSC/2.0-self.bSW
+        self.fwd_SW_foam_left = self.fwd_SW_left+self.bSWbiax
+        self.fwd_SW_foam_right = self.fwd_SW_foam_left+self.bSWfoam
         self.fwd_SW_right = -self.bSC/2.0
         self.rear_SW_left = self.bSC/2.0
+        self.rear_SW_foam_left = self.rear_SW_left+self.bSWbiax
+        self.rear_SW_foam_right = self.rear_SW_foam_left+self.bSWfoam
         self.rear_SW_right = self.bSC/2.0+self.bSW
         # aft panels
         self.aft_panel_left = self.bSC/2.0+self.bSW
@@ -112,8 +116,14 @@ color block spans the plot from top to bottom.
         # spar caps
         plt.axvspan(self.SC_left, self.SC_right, facecolor='cyan', edgecolor='cyan')
         # shear webs
-        plt.axvspan(self.fwd_SW_left, self.fwd_SW_right, facecolor='yellow', edgecolor='yellow')
-        plt.axvspan(self.rear_SW_left, self.rear_SW_right, facecolor='yellow', edgecolor='yellow')
+        #   biax
+        plt.axvspan(self.fwd_SW_left, self.fwd_SW_foam_left, facecolor='green', edgecolor='green')
+        plt.axvspan(self.fwd_SW_foam_right, self.fwd_SW_right, facecolor='green', edgecolor='green')
+        plt.axvspan(self.rear_SW_left, self.rear_SW_foam_left, facecolor='green', edgecolor='green')
+        plt.axvspan(self.rear_SW_foam_right, self.rear_SW_right, facecolor='green', edgecolor='green')
+        #   foam
+        plt.axvspan(self.fwd_SW_foam_left, self.fwd_SW_foam_right, facecolor='yellow', edgecolor='yellow')
+        plt.axvspan(self.rear_SW_foam_left, self.rear_SW_foam_right, facecolor='yellow', edgecolor='yellow')
         # aft panels
         plt.axvspan(self.aft_panel_left, self.aft_panel_right, facecolor='orange', edgecolor='orange')
         # TE reinforcement
@@ -166,10 +176,14 @@ components as attributes in the Airfoil class.
         self.SC_right_coords = self.find_edge_coords(self.SC_right)
         self.SC_left_coords = self.find_edge_coords(self.SC_left)
         self.fwd_SW_left_coords = self.find_edge_coords(self.fwd_SW_left)
+        self.fwd_SW_foam_left_coords = self.find_edge_coords(self.fwd_SW_foam_left)
+        self.fwd_SW_foam_right_coords = self.find_edge_coords(self.fwd_SW_foam_right)
         # fwd_SW_right_coords are the same as SC_left_coords
         self.fwd_SW_right_coords = self.SC_left_coords
         # rear_SW_left_coords are the same as SC_right_coords
         self.rear_SW_left_coords = self.SC_right_coords
+        self.rear_SW_foam_left_coords = self.find_edge_coords(self.rear_SW_foam_left)
+        self.rear_SW_foam_right_coords = self.find_edge_coords(self.rear_SW_foam_right)
         # rear_SW_right_coords are the same as aft_panel_left_coords
         self.rear_SW_right_coords = self.aft_panel_left_coords
         # LE_panel_right_coords are the same as fwd_SW_left_coords
@@ -213,6 +227,32 @@ Returns a numpy array of coordinates for the leading edge segment.
         upper_segment = self.upper[:upper_index+1]
         LE_segment = np.append(lower_segment, upper_segment[1:])
         return LE_segment
+
+
+    def extract_fwd_SW_segments(self):
+        """
+Extract the segments along the biax and foam parts of the forward shear web.
+
+        """
+        # forward biax
+        (self.fwd_SW_fwdbiax_lower_segment, self.fwd_SW_fwdbiax_upper_segment) = self.extract_segment_along_airfoil_profile(self.fwd_SW_left_coords, self.fwd_SW_foam_left_coords)
+        # foam core
+        (self.fwd_SW_foam_lower_segment, self.fwd_SW_foam_upper_segment) = self.extract_segment_along_airfoil_profile(self.fwd_SW_foam_left_coords, self.fwd_SW_foam_right_coords)
+        # rear biax
+        (self.fwd_SW_rearbiax_lower_segment, self.fwd_SW_rearbiax_upper_segment) = self.extract_segment_along_airfoil_profile(self.fwd_SW_foam_right_coords, self.fwd_SW_right_coords)
+
+
+    def extract_rear_SW_segments(self):
+        """
+Extract the segments along the biax and foam parts of the rear shear web.
+
+        """
+        # forward biax
+        (self.rear_SW_fwdbiax_lower_segment, self.rear_SW_fwdbiax_upper_segment) = self.extract_segment_along_airfoil_profile(self.rear_SW_left_coords, self.rear_SW_foam_left_coords)
+        # foam core
+        (self.rear_SW_foam_lower_segment, self.rear_SW_foam_upper_segment) = self.extract_segment_along_airfoil_profile(self.rear_SW_foam_left_coords, self.rear_SW_foam_right_coords)
+        # rear biax
+        (self.rear_SW_rearbiax_lower_segment, self.rear_SW_rearbiax_upper_segment) = self.extract_segment_along_airfoil_profile(self.rear_SW_foam_right_coords, self.rear_SW_right_coords)
 
 
     def extract_TE_segments(self):
@@ -326,6 +366,8 @@ Segments for each structural component are extracted in this order:
         (self.aft_panel_lower_segment, self.aft_panel_upper_segment) = self.extract_segment_along_airfoil_profile(self.aft_panel_left_coords, self.aft_panel_right_coords)
         (self.fwd_SW_lower_segment, self.fwd_SW_upper_segment) = self.extract_segment_along_airfoil_profile(self.fwd_SW_left_coords, self.fwd_SW_right_coords)
         (self.rear_SW_lower_segment, self.rear_SW_upper_segment) = self.extract_segment_along_airfoil_profile(self.rear_SW_left_coords, self.rear_SW_right_coords)
+        # self.extract_fwd_SW_segments()
+        # self.extract_rear_SW_segments()
         self.LE_segment = self.extract_LE_segment()
         (self.TE_lower_main_segment, self.TE_upper_main_segment, self.TE_lower_sharp_segment, self.TE_upper_sharp_segment, self.TE_inner_surf_segment) = self.extract_TE_segments()
 
@@ -344,10 +386,22 @@ Plot all the segments along the airfoil profile with different symbols.
         plt.plot(self.LE_segment['x'],self.LE_segment['y'],'ko-')
         plt.plot(self.fwd_SW_upper_segment['x'],self.fwd_SW_upper_segment['y'],'bs-')
         plt.plot(self.fwd_SW_lower_segment['x'],self.fwd_SW_lower_segment['y'],'rs-')
+        # plt.plot(self.fwd_SW_fwdbiax_upper_segment['x'],self.fwd_SW_fwdbiax_upper_segment['y'],'bs-')
+        # plt.plot(self.fwd_SW_fwdbiax_lower_segment['x'],self.fwd_SW_fwdbiax_lower_segment['y'],'rs-')
+        # plt.plot(self.fwd_SW_foam_upper_segment['x'],self.fwd_SW_foam_upper_segment['y'],'m^-')
+        # plt.plot(self.fwd_SW_foam_lower_segment['x'],self.fwd_SW_foam_lower_segment['y'],'g^-')
+        # plt.plot(self.fwd_SW_rearbiax_upper_segment['x'],self.fwd_SW_rearbiax_upper_segment['y'],'bs-')
+        # plt.plot(self.fwd_SW_rearbiax_lower_segment['x'],self.fwd_SW_rearbiax_lower_segment['y'],'rs-')
         plt.plot(self.SC_upper_segment['x'],self.SC_upper_segment['y'],'m^-')
         plt.plot(self.SC_lower_segment['x'],self.SC_lower_segment['y'],'g^-')
         plt.plot(self.rear_SW_upper_segment['x'],self.rear_SW_upper_segment['y'],'bo-')
         plt.plot(self.rear_SW_lower_segment['x'],self.rear_SW_lower_segment['y'],'ro-')
+        # plt.plot(self.rear_SW_fwdbiax_upper_segment['x'],self.rear_SW_fwdbiax_upper_segment['y'],'bo-')
+        # plt.plot(self.rear_SW_fwdbiax_lower_segment['x'],self.rear_SW_fwdbiax_lower_segment['y'],'ro-')
+        # plt.plot(self.rear_SW_foam_upper_segment['x'],self.rear_SW_foam_upper_segment['y'],'m^-')
+        # plt.plot(self.rear_SW_foam_lower_segment['x'],self.rear_SW_foam_lower_segment['y'],'g^-')
+        # plt.plot(self.rear_SW_rearbiax_upper_segment['x'],self.rear_SW_rearbiax_upper_segment['y'],'bo-')
+        # plt.plot(self.rear_SW_rearbiax_lower_segment['x'],self.rear_SW_rearbiax_lower_segment['y'],'ro-')
         plt.plot(self.aft_panel_upper_segment['x'],self.aft_panel_upper_segment['y'],'ms-')
         plt.plot(self.aft_panel_lower_segment['x'],self.aft_panel_lower_segment['y'],'gs-')
         plt.plot(self.TE_upper_main_segment['x'],self.TE_upper_main_segment['y'],'b^-')
