@@ -4,14 +4,14 @@ c specify the node distribution
 c   i-list
     1 18;
 c   j-list
-    1 2 3;
+    1 2 3 4;
 c   k-list (use -1 to use 2D shell elements)
     -1;
 c specify the coordinates
 c   x-coordinates
     [%bsc/2.0+%bsw] [%chord-%pitchaxis*%chord-%btereinf];
 c   y-coordinates
-    0.0 0.1 0.2;
+    0.0 0.05 0.1 0.2;
 c   z-coordinates
     0;
 
@@ -20,10 +20,26 @@ c attach part to guide curves
 c attach the top edge
 cure
 c   region
+    0 4 1  c  i-min j-min k-min   (0 picks extreme min)
+    0 4 1  c  i-max j-max k-max   (0 picks extreme max)
+c   curve_id
+    11
+
+c attach the upper middle edge (j=3)
+cure
+c   region
     0 3 1  c  i-min j-min k-min   (0 picks extreme min)
     0 3 1  c  i-max j-max k-max   (0 picks extreme max)
 c   curve_id
-    11
+    35
+
+c attach the lower middle edge (j=2)
+cure
+c   region
+    0 2 1  c  i-min j-min k-min   (0 picks extreme min)
+    0 2 1  c  i-max j-max k-max   (0 picks extreme max)
+c   curve_id
+    36
 
 c attach the bottom edge
 cure
@@ -41,12 +57,6 @@ c   region
 c   curve_id
     26
 
-c interpolate multiple regions as one region
-hyr
-c   region
-    0 0 1  c  i-min j-min k-min
-    0 0 1  c  i-max j-max k-max
-
 
 c make block boundaries ------------------------------------------------------
 
@@ -62,6 +72,6 @@ c make block boundary (slave #12) on right edge
 bb
 c   region
     2 2 1  c  i-min j-min k-min
-    2 3 1  c  i-max j-max k-max
+    2 4 1  c  i-max j-max k-max
 c   interface
     12;

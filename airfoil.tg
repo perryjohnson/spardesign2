@@ -304,13 +304,17 @@ ld 17 lod 5 [%hSC]
 ld 19 lod 9 [-%hSC]
 ld 20 lod 11 [-%hAFTpanel]
 
-C c draw guide curves for the shear webs
-C c   forward shear web
-C ld 23 lpil 6 7; lpil 7 8;
-C ld 24 lpil 5 6; lpil 8 9;
-C c   rear shear web
-C ld 25 lpil 4 5; lpil 9 10;
-C ld 26 lpil 3 4; lpil 10 11;
+c guide curves for the uniax laminate thickness in the TE reinforcement
+c   lower main TE reinforcement
+ld 31 lod 2 [-%hTEuniax]
+c   upper main TE reinforcement
+ld 32 lod 12 [-%hTEuniax]
+
+c guide curves for the aft panel to match up with the TE reinforcement
+ld 33 lod 3 [%hTEuniax]
+ld 34 lod 3 [%hTEuniax+%hTEfoam]
+ld 35 lod 11 [-%hTEuniax]
+ld 36 lod 11 [-%hTEuniax-%hTEfoam]
 
 c display all 2D curves
 c gset 2.7 0 1
@@ -347,6 +351,12 @@ curd 27 ld2d3d 27 rt z 0 0 ;
 curd 28 ld2d3d 28 rt z 0 0 ;
 curd 29 ld2d3d 29 rt z 0 0 ;
 curd 30 ld2d3d 30 rt z 0 0 ;
+curd 31 ld2d3d 31 rt z 0 0 ;
+curd 32 ld2d3d 32 rt z 0 0 ;
+curd 33 ld2d3d 33 rt z 0 0 ;
+curd 34 ld2d3d 34 rt z 0 0 ;
+curd 35 ld2d3d 35 rt z 0 0 ;
+curd 36 ld2d3d 36 rt z 0 0 ;
 
 c PART 1: forward shear web
 include fwd_SW.tg
@@ -374,25 +384,41 @@ c   region
     3 0 1  c  i-max j-max k-max
 c   material_#
     4
-c interrupt
+interrupt
 
 c PART 3: lower main TE reinforcement
 include lower_main_TE_reinf.tg
 eset 0 0 1 0 0 1 = lwMainTE
+c assign foam material to the lower main TE reinforcement (everywhere)
 mate 4
+c assign uniaxial material to the lower main TE reinforcement (outer edge)
+mt
+c   region
+    0 1 1  c  i-min j-min k-min
+    0 2 1  c  i-max j-max k-max
+c   material_#
+    1
 c interrupt
 
 c PART 4: upper main TE reinforcement
 include upper_main_TE_reinf.tg
 eset 0 0 1 0 0 1 = upMainTE
+c assign foam material to the upper main TE reinforcement (everywhere)
 mate 4
+c assign uniaxial material to the upper main TE reinforcement (outer edge)
+mt
+c   region
+    0 2 1  c  i-min j-min k-min
+    0 3 1  c  i-max j-max k-max
+c   material_#
+    1
 c interrupt
 
 c PART 5: lower aft panel
 include lower_aft_panel.tg
 eset 0 0 1 0 0 1 = loweraft
 mate 4
-c interrupt
+interrupt
 
 c PART 6: upper aft panel
 include upper_aft_panel.tg
@@ -403,13 +429,13 @@ c interrupt
 c PART 7: lower spar cap
 include lower_SC.tg
 eset 0 0 1 0 0 1 = lowerSC
-mate 4
+mate 1
 c interrupt
 
 c PART 8: upper spar cap
 include upper_SC.tg
 eset 0 0 1 0 0 1 = upperSC
-mate 4
+mate 1
 c interrupt
 
 c PART 9: LE panel
@@ -418,6 +444,7 @@ eset 0 0 1 0 0 1 = LEpanel
 mate 4
 c interrupt
 
+c LEFT OFF HERE *********************************************************
 c PART 10: upper sharp TE reinforcement
 include upper_sharp_TE_reinf.tg
 eset 0 0 1 0 0 1 = upShpTE
