@@ -7,8 +7,7 @@ a.plot_all_segments()
 f = open('segments.tg','w+')
 
 def write_segment(f,segment,segment_name,curve_number,comments='c'):
-    """
-Write a segment to a file, formatted as a 2D curve for a TrueGrid input file.
+    """Write a segment to a file, formatted as a 2D curve for a TrueGrid input file.
 
     """
     f.write(comments + ' ' + segment_name + '\n')

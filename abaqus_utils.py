@@ -1,9 +1,8 @@
-"""
-A module to parse data from an ABAQUS-formatted 2D cross-section grid file.
+"""A module to parse data from an ABAQUS-formatted 2D cross-section grid file.
 
 Authors: Perry Roth-Johnson
 Phil Chiu
-Last updated: March 26, 2013
+Last updated: July 19, 2013
 
 """
 
@@ -14,93 +13,92 @@ import numpy as np
 
 
 class AbaqusGrid:
-    """
-The AbaqusGrid class contains methods for parsing an ABAQUS-formatted
-2D grid file (cross-section grid).
+    """The AbaqusGrid class contains methods for parsing an ABAQUS-formatted
+    2D grid file (cross-section grid).
 
-Usage:
-import abaqus_utils as au
-g = au.AbaqusGrid('cs_abq.txt')
-g.node_array
-g.node_array['node_no']
-g.node_array['x2']
-g.node_array['x3']
-g.element_array
-g.elementset_array
-g.number_of_nodes
-g.number_of_elements
+    Usage:
+    import abaqus_utils as au
+    g = au.AbaqusGrid('cs_abq.txt')
+    g.node_array
+    g.node_array['node_no']
+    g.node_array['x2']
+    g.node_array['x3']
+    g.element_array
+    g.elementset_array
+    g.number_of_nodes
+    g.number_of_elements
 
-Initialization:
-AbaqusGrid(filename, debug_flag=False)
-  filename - A string for the full path of the ABAQUS-formatted grid file.
-  debug_flag - Optional boolean to print intermediate results to the screen.
+    Initialization:
+    AbaqusGrid(filename, debug_flag=False)
+      filename - A string for the full path of the ABAQUS-formatted grid file.
+      debug_flag - Optional boolean to print intermediate results to the screen.
 
-Public attributes:
-filename - A string for the full path of the ABAQUS-formatted grid file.
-node_array - A structured array that stores nodes in 3 columns:
-    node_no: A unique integer that labels this node.
-    x2: A float for the x2-coordinate of this node.
-    x3: A float for the x3-coordinate of this node.
-element_array - A structured array that stores element connectivity.
-    If the element is linear (4-noded), 6 columns are stored:
-        layer_no: An integer for the unique layer associated with this element.
-        elem_no: An integer that represents this unique element.
-                                4-------3
-                                |       |   The VABS linear quadrilateral
-                                |       |   element node numbering scheme.
-                                |       |
-                                1-------2
-        node1: An integer for the unique node located at the bottom left corner
-            of this element.
-        node2: An integer for the unique node located at the bottom right
-            corner of this element.
-        node3: An integer for the unique node located at the top right corner
-            of this element.
-        node4: An integer for the unique node located at the top left corner of
-            this element.
-    If the element is quadratic (8-noded), 10 columns are stored:
-        layer_no: An integer for the unique layer associated with this element.
-        elem_no: An integer that represents this unique element.
-                                4---7---3
-                                |       |   The VABS quadratic quadrilateral
-                                8       6   element node numbering scheme.
-                                |       |
-                                1---5---2
-        node1: An integer for the unique node located at the bottom left corner
-            of this element.
-        node2: An integer for the unique node located at the bottom right
-            corner of this element.
-        node3: An integer for the unique node located at the top right corner
-            of this element.
-        node4: An integer for the unique node located at the top left corner of
-            this element.
-        node5: An integer for the unique node located at the midpoint of the
-            bottom side of this element.
-        node6: An integer for the unique node located at the midpoint of the
-            right side of this element.
-        node7: An integer for the unique node located at the midpoint of the
-            top side of this element.
-        node8: An integer for the unique node located at the midpoint of the
-            left side of this element.
-        The VABS quadrilateral element node numbering scheme is shown below:
-elementset_array - A structured array that stores element orientation angles in
-    2 columns:
-    theta1: The orientation (in degrees) of this element. Sometimes this is
-        also referred to as the "layer plane angle."
-                Consider the box cross-section below:
+    Public attributes:
+    filename - A string for the full path of the ABAQUS-formatted grid file.
+    node_array - A structured array that stores nodes in 3 columns:
+        node_no: A unique integer that labels this node.
+        x2: A float for the x2-coordinate of this node.
+        x3: A float for the x3-coordinate of this node.
+    element_array - A structured array that stores element connectivity.
+        If the element is linear (4-noded), 6 columns are stored:
+            layer_no: An integer for the unique layer associated with this element.
+            elem_no: An integer that represents this unique element.
+                                    4-------3
+                                    |       |   The VABS linear quadrilateral
+                                    |       |   element node numbering scheme.
+                                    |       |
+                                    1-------2
+            node1: An integer for the unique node located at the bottom left corner
+                of this element.
+            node2: An integer for the unique node located at the bottom right
+                corner of this element.
+            node3: An integer for the unique node located at the top right corner
+                of this element.
+            node4: An integer for the unique node located at the top left corner of
+                this element.
+        If the element is quadratic (8-noded), 10 columns are stored:
+            layer_no: An integer for the unique layer associated with this element.
+            elem_no: An integer that represents this unique element.
+                                    4---7---3
+                                    |       |   The VABS quadratic quadrilateral
+                                    8       6   element node numbering scheme.
+                                    |       |
+                                    1---5---2
+            node1: An integer for the unique node located at the bottom left corner
+                of this element.
+            node2: An integer for the unique node located at the bottom right
+                corner of this element.
+            node3: An integer for the unique node located at the top right corner
+                of this element.
+            node4: An integer for the unique node located at the top left corner of
+                this element.
+            node5: An integer for the unique node located at the midpoint of the
+                bottom side of this element.
+            node6: An integer for the unique node located at the midpoint of the
+                right side of this element.
+            node7: An integer for the unique node located at the midpoint of the
+                top side of this element.
+            node8: An integer for the unique node located at the midpoint of the
+                left side of this element.
+            The VABS quadrilateral element node numbering scheme is shown below:
+    elementset_array - A structured array that stores element orientation angles in
+        2 columns:
+        theta1: The orientation (in degrees) of this element. Sometimes this is
+            also referred to as the "layer plane angle."
+                    Consider the box cross-section below:
 
-                            theta1 = 0
-                        ---------------------
-                        |    (top wall)     |
-            theta1 = 90 |                   | theta1 = 270
-            (left wall) |                   | (right wall)
-                        |   (bottom wall)   |
-                        ---------------------
-                            theta1 = 180
+                                theta1 = 0
+                            ---------------------
+                            |    (top wall)     |
+                theta1 = 90 |                   | theta1 = 270
+                (left wall) |                   | (right wall)
+                            |   (bottom wall)   |
+                            ---------------------
+                                theta1 = 180
 
-    elem_no: An integer that represents a unique element.
-number_of_nodes - An integer for the number of nodes in the grid.
-number_of_elements - An integer for the number of elements in the grid.
+        elem_no: An integer that represents a unique element.
+    number_of_nodes - An integer for the number of nodes in the grid.
+    number_of_elements - An integer for the number of elements in the grid.
 
     """
 
@@ -111,13 +109,12 @@ number_of_elements - An integer for the number of elements in the grid.
 
 
     def _read_file(self):
-        """
-Saves the ABAQUS file as a list of strings (as an attribute).
+        """Saves the ABAQUS file as a list of strings (as an attribute).
 
-Each element in the list represents one line in the file.
+        Each element in the list represents one line in the file.
 
-Saves:
-self._abq_file - A list of strings.
+        Saves:
+        self._abq_file - A list of strings.
 
         """
         f = open(self.filename, 'r')
@@ -126,15 +123,14 @@ self._abq_file - A list of strings.
 
 
     def _define_patterns(self):
-        """
-Define regular expressions to search for nodes and elements in the ABAQUS file.
+        """Define regular expressions to search for nodes and elements in the ABAQUS file.
 
-Saves:
-self._node_pattern
-self._element_pattern
-self._node_header_pattern
-self._element_header_pattern
-self._elementset_header_pattern
+        Saves:
+        self._node_pattern
+        self._element_pattern
+        self._node_header_pattern
+        self._element_header_pattern
+        self._elementset_header_pattern
 
         """
         self._node_pattern = re.compile(
@@ -172,14 +168,13 @@ self._elementset_header_pattern
         
 
     def _find_block_starts(self):
-        """
-Returns the indices (line number) for the start of the node, element
-connectivity, and element set blocks in self._abq_file.
+        """Returns the indices (line number) for the start of the node, element
+        connectivity, and element set blocks in self._abq_file.
 
-Saves:
-self._node_block_start
-self._element_block_start
-self._elementset_block_start
+        Saves:
+        self._node_block_start
+        self._element_block_start
+        self._elementset_block_start
 
         """
         node_headers = []
@@ -213,12 +208,11 @@ self._elementset_block_start
 
 
     def _parse_nodes(self):
-        """
-Save the nodes in a structured array (as an attribute).
+        """Save the nodes in a structured array (as an attribute).
 
-Saves:
-self.number_of_nodes
-self.node_array
+        Saves:
+        self.number_of_nodes
+        self.node_array
 
         """
         list_of_node_tuples = []
@@ -237,15 +231,14 @@ self.node_array
 
 
     def _parse_elements(self, debug_flag=False):
-        """
-Saves the elements in a structured array (as an attribute).
+        """Saves the elements in a structured array (as an attribute).
 
-Note: This function only supports linear (4-noded) elements and quadratic
-(8-noded) elements from TrueGrid.
+        Note: This function only supports linear (4-noded) elements and quadratic
+        (8-noded) elements from TrueGrid.
 
-Saves:
-self.number_of_elements
-self.element_array
+        Saves:
+        self.number_of_elements
+        self.element_array
 
         """
         list_of_element_tuples = []
@@ -303,14 +296,13 @@ self.element_array
 
 
     def id_corner_and_midside_nodes(self, debug_flag=False):
-        """
-Identifies which nodes are corner nodes and midside nodes.
+        """Identifies which nodes are corner nodes and midside nodes.
 
-If node[i] is a corner node, then self.node_array[i]['is_corner_node'] = 1.
-If node[i] is a midside node, then self.node_array[i]['is_corner_node'] = 0.
+        If node[i] is a corner node, then self.node_array[i]['is_corner_node'] = 1.
+        If node[i] is a midside node, then self.node_array[i]['is_corner_node'] = 0.
 
-If node[i] is neither, then self.node_array[i]['is_corner_node'] = -1.
-(This is the default value set in self._parse_nodes().)
+        If node[i] is neither, then self.node_array[i]['is_corner_node'] = -1.
+        (This is the default value set in self._parse_nodes().)
 
         """
         for elem in self.element_array:
@@ -333,33 +325,31 @@ If node[i] is neither, then self.node_array[i]['is_corner_node'] = -1.
 
 
     def id_labels_for_midside_nodes(self):
-        """
-Identifies the first node label (lower label) and second node label (higher
-label) for each midside node.
+        """Identifies the first node label (lower label) and second node label (higher
+        label) for each midside node.
 
-This information is only needed for the SAFE input file.
+        This information is only needed for the SAFE input file.
 
         """
         return
 
 
     def _parse_elementsets(self, debug_flag=False):
-        """
-Save all the elements and their orientations (theta1) in a structured array
-(as an attribute).
+        """Save all the elements and their orientations (theta1) in a structured array
+        (as an attribute).
 
-Saves:
-self.elementset_array
+        Saves:
+        self.elementset_array
 
-FUTURE WORK: theta1_dict should be pulled out and replaced with an input file
-supplied by the user...maybe add theta1_dict as a keyword argument?
+        FUTURE WORK: theta1_dict should be pulled out and replaced with an input file
+        supplied by the user...maybe add theta1_dict as a keyword argument?
 
-KNOWN BUG: The elementsets in the ABAQUS file may be missing some elements!
-seems to be more likely to happen when quadratic elements are generated with
-TrueGrid. When linear elements are generated, everything is usually okay. A
-quick and dirty fix was implemented in the past: search for elements in the
-mesh that have not yet been assigned a theta1 value. Based on the middle
-coordinates of that element, assign a theta1 value.
+        KNOWN BUG: The elementsets in the ABAQUS file may be missing some elements!
+        seems to be more likely to happen when quadratic elements are generated with
+        TrueGrid. When linear elements are generated, everything is usually okay. A
+        quick and dirty fix was implemented in the past: search for elements in the
+        mesh that have not yet been assigned a theta1 value. Based on the middle
+        coordinates of that element, assign a theta1 value.
 
         """
         list_of_elementset_tuples = []
@@ -414,26 +404,25 @@ Elements are missing from the elementset blocks in the ABAQUS file!
 
 
     def _parse_abaqus(self, debug_flag=False):
-        """
-Parses the ABAQUS output file and saves the node, element, and eset structured
-arrays as object attributes.
+        """Parses the ABAQUS output file and saves the node, element, and eset structured
+        arrays as object attributes.
 
-This non-public method is automatically run when a new AbaqusGrid instance is
-created.
+        This non-public method is automatically run when a new AbaqusGrid instance is
+        created.
 
-Saves:
-self.number_of_nodes
-self.node_array
+        Saves:
+        self.number_of_nodes
+        self.node_array
 
-Usage:
-cd safe
-import scripts.abaqus_utilities as au
-g = au.AbaqusGrid('run_01/input/spar_station_04_linear_abq.txt')
-g._parse_abaqus(debug_flag=True)
+        Usage:
+        cd safe
+        import scripts.abaqus_utilities as au
+        g = au.AbaqusGrid('run_01/input/spar_station_04_linear_abq.txt')
+        g._parse_abaqus(debug_flag=True)
 
-g.node_array
-g.element_array
-g.elementset_array
+        g.node_array
+        g.element_array
+        g.elementset_array
 
         """
 

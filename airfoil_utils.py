@@ -1,9 +1,8 @@
-"""
-A script that splits an airfoil curve into separate segments for each
+"""A script that splits an airfoil curve into separate segments for each
 structural component: spar caps, shear webs, aft panels, etc.
 
 Author: Perry Roth-Johnson
-Last updated: March 25, 2013
+Last updated: July 19, 2013
 
 """
 
@@ -14,13 +13,12 @@ import scipy.interpolate as ipl
 dtype = [('x', 'f8'), ('y', 'f8')]
 
 class Airfoil:
-    """
-The Airfoil class contains methods to read in a file of airfoil coordinates,
-then splits the coordinates into segments for each structural component:
-spar caps, shear webs, aft panels, trailing edge reinforcement, etc.
+    """The Airfoil class contains methods to read in a file of airfoil coordinates,
+    then splits the coordinates into segments for each structural component:
+    spar caps, shear webs, aft panels, trailing edge reinforcement, etc.
 
-Usage:
-a = Airfoil('NACA 64-618','SNL100-00_v0/airfoils/NACA_64-618.txt')
+    Usage:
+    a = Airfoil('NACA 64-618','SNL100-00_v0/airfoils/NACA_64-618.txt')
 
     """
     def __init__(self, name, coords_file):
@@ -63,10 +61,7 @@ a = Airfoil('NACA 64-618','SNL100-00_v0/airfoils/NACA_64-618.txt')
 
 
     def plot_thickness_vs_chord(self):
-        """
-Plots the thickness of the airfoil versus the chord length.
-
-        """
+        """Plots the thickness of the airfoil versus the chord length."""
         plt.figure()
         plt.axes().set_aspect('equal')
         t = []
@@ -78,10 +73,7 @@ Plots the thickness of the airfoil versus the chord length.
 
 
     def save_region_edges(self):
-        """
-Save the x-coordinates of the region edges for each structural component.
-
-        """
+        """Save the x-coordinates of the region edges for each structural component."""
         # LE panel
         self.LE_panel_left = -self.pitchaxis*self.chord
         self.LE_panel_right = -self.bSC/2.0-self.bSW
@@ -106,9 +98,8 @@ Save the x-coordinates of the region edges for each structural component.
 
 
     def plot_region_edges(self):
-        """
-Plots color blocks to mark off the regions for each structural component. Each
-color block spans the plot from top to bottom.
+        """Plots color blocks to mark off the regions for each structural
+        component. Each color block spans the plot from top to bottom.
 
         """
         # LE panel
@@ -131,12 +122,11 @@ color block spans the plot from top to bottom.
 
 
     def find_edge_coords(self, x_edge):
-        """
-Find the airfoil coordinates at the edges of each structural component.
+        """Find the airfoil coordinates at the edges of each structural component.
 
-Returns two coordinate pairs as tuples, one coordinate pair for the lower
-surface (x_edge,y_edge_lower), and another for the upper surface of the airfoil
-(x_edge,y_edge_upper).
+        Returns two coordinate pairs as tuples, one coordinate pair for the lower
+        surface (x_edge,y_edge_lower), and another for the upper surface of the airfoil
+        (x_edge,y_edge_upper).
 
         """
         # lower airfoil surface
@@ -166,9 +156,8 @@ surface (x_edge,y_edge_lower), and another for the upper surface of the airfoil
 
 
     def save_edge_coords(self):
-        """
-Use the method find_edge_coords() to save edge coordinates for all structural
-components as attributes in the Airfoil class.
+        """Use the method find_edge_coords() to save edge coordinates for all structural
+        components as attributes in the Airfoil class.
 
         """
         self.aft_panel_right_coords = self.find_edge_coords(self.aft_panel_right)
@@ -193,12 +182,11 @@ components as attributes in the Airfoil class.
 
 
     def extract_segment_along_airfoil_profile(self, left_coords, right_coords):
-        """
-Extract a single segment along the airfoil profile, given the left and right
-edge coordinates for that segment.
+        """Extract a single segment along the airfoil profile, given the left and right
+        edge coordinates for that segment.
 
-Returns two numpy arrays of coordinates, one for the lower segment and another
-for the upper segment.
+        Returns two numpy arrays of coordinates, one for the lower segment and another
+        for the upper segment.
 
         """
         # find the indices of the segment edges
@@ -213,10 +201,9 @@ for the upper segment.
 
 
     def extract_LE_segment(self):
-        """
-Extract the segment along the leading edge panel.
+        """Extract the segment along the leading edge panel.
 
-Returns a numpy array of coordinates for the leading edge segment.
+        Returns a numpy array of coordinates for the leading edge segment.
 
         """
         # find the indices
@@ -230,10 +217,7 @@ Returns a numpy array of coordinates for the leading edge segment.
 
 
     def extract_fwd_SW_segments(self):
-        """
-Extract the segments along the biax and foam parts of the forward shear web.
-
-        """
+        """Extract the segments along the biax and foam parts of the forward shear web."""
         # forward biax
         (self.fwd_SW_fwdbiax_lower_segment, self.fwd_SW_fwdbiax_upper_segment) = self.extract_segment_along_airfoil_profile(self.fwd_SW_left_coords, self.fwd_SW_foam_left_coords)
         # foam core
@@ -243,10 +227,7 @@ Extract the segments along the biax and foam parts of the forward shear web.
 
 
     def extract_rear_SW_segments(self):
-        """
-Extract the segments along the biax and foam parts of the rear shear web.
-
-        """
+        """Extract the segments along the biax and foam parts of the rear shear web."""
         # forward biax
         (self.rear_SW_fwdbiax_lower_segment, self.rear_SW_fwdbiax_upper_segment) = self.extract_segment_along_airfoil_profile(self.rear_SW_left_coords, self.rear_SW_foam_left_coords)
         # foam core
@@ -256,21 +237,20 @@ Extract the segments along the biax and foam parts of the rear shear web.
 
 
     def extract_TE_segments(self):
-        """
-Extract the segments along the trailing edge reinforcement.
+        """Extract the segments along the trailing edge reinforcement.
 
-Returns five numpy arrays of coordinates:
-(1) lower main segment: The main segment for the trailing edge reinforcement,
-    along the lower airfoil surface.
-(2) upper main segment: The main segment for the trailing edge reinforcement,
-    along the upper airfoil surface.
-(3) lower tip segment: An additional segment near the tip of the trailing edge
-    reinforcement, along the lower airfoil surface.
-(4) upper sharp segment: An additional segment near the tip of the trailing
-    edge reinforcement, along the upper airfoil surface.
-(5) inner surface segment: An additional segment near the tip of the trailing
-    edge reinforcement, along the interface between the upper and lower
-    laminates.
+        Returns five numpy arrays of coordinates:
+        (1) lower main segment: The main segment for the trailing edge reinforcement,
+            along the lower airfoil surface.
+        (2) upper main segment: The main segment for the trailing edge reinforcement,
+            along the upper airfoil surface.
+        (3) lower tip segment: An additional segment near the tip of the trailing edge
+            reinforcement, along the lower airfoil surface.
+        (4) upper sharp segment: An additional segment near the tip of the trailing
+            edge reinforcement, along the upper airfoil surface.
+        (5) inner surface segment: An additional segment near the tip of the trailing
+            edge reinforcement, along the interface between the upper and lower
+            laminates.
 
         """
         # find the normal vectors on the upper and lower parts of the TE_segment
@@ -350,16 +330,15 @@ Returns five numpy arrays of coordinates:
 
 
     def extract_all_segments_along_airfoil_profile(self):
-        """
-Extract all segments along the airfoil profile.
+        """Extract all segments along the airfoil profile.
 
-Segments for each structural component are extracted in this order:
-(1) spar caps
-(2) aft panels
-(3) forward shear web
-(4) rear shear web
-(5) leading edge panel
-(6) trailing edge reinforcement
+        Segments for each structural component are extracted in this order:
+        (1) spar caps
+        (2) aft panels
+        (3) forward shear web
+        (4) rear shear web
+        (5) leading edge panel
+        (6) trailing edge reinforcement
 
         """
         (self.SC_lower_segment, self.SC_upper_segment) = self.extract_segment_along_airfoil_profile(self.SC_left_coords, self.SC_right_coords)
@@ -373,10 +352,7 @@ Segments for each structural component are extracted in this order:
 
 
     def plot_all_segments(self):
-        """
-Plot all the segments along the airfoil profile with different symbols.
-
-        """
+        """Plot all the segments along the airfoil profile with different symbols."""
         plt.figure()
         plt.axes().set_aspect('equal')
         self.save_region_edges()
